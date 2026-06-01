@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>企业申报管理平台</title>
+<style>
+:root { --primary: #1677ff; --success: #52c41a; --warning: #faad14; --danger: #ff4d4f; --bg: #f5f7fa; --card-bg: #fff; --text: #333; --text-secondary: #666; --border: #e8e8e8; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.app-header { background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%); color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.app-header h1 { font-size: 20px; font-weight: 600; }
+.app-header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Tabs */
+.tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--card-bg); border-radius: 8px 8px 0 0; overflow: hidden; border: 1px solid var(--border); border-bottom: none; }
+.tab-btn { flex: 1; padding: 14px 20px; border: none; background: #fafafa; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-secondary); transition: all 0.2s; border-bottom: 2px solid transparent; }
+.tab-btn:hover { background: #f0f5ff; color: var(--primary); }
+.tab-btn.active { background: #fff; color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+
+/* Cards */
+.card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
+.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.form-group { display: flex; flex-direction: column; }
+.form-group.full { grid-column: 1 / -1; }
+.form-group label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
+.form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
+.form-group textarea { resize: vertical; min-height: 60px; }
+.form-group .hint { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+/* Buttons */
+.btn { padding: 8px 20px; border-radius: 6px; border: 1px solid var(--border); font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
+.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+.btn-primary:hover { background: #4096ff; }
+.btn-success { background: var(--success); color: #fff; border-color: var(--success); }
+.btn-success:hover { opacity: 0.85; }
+.btn-danger { background: #fff; color: var(--danger); border-color: var(--danger); }
+.btn-danger:hover { background: #fff2f0; }
+.btn-outline { background: #fff; color: var(--text); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-sm { padding: 4px 12px; font-size: 12px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* Table */
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+th { background: #fafafa; font-weight: 600; color: var(--text-secondary); font-size: 13px; white-space: nowrap; }
+tr:hover td { background: #f0f5ff; }
+
+/* Badge */
+.badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
+.badge-draft { background: #f5f5f5; color: #999; }
+.badge-pending { background: #fff7e6; color: #d48806; }
+.badge-approved { background: #f6ffed; color: #389e0d; }
+.badge-rejected { background: #fff2f0; color: #cf1322; }
+
+/* Status bar & score */
+.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.stat-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 16px; text-align: center; }
+.stat-card .num { font-size: 28px; font-weight: 700; color: var(--primary); }
+.stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+.score-bar { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
+.score-fill { height: 8px; border-radius: 4px; background: var(--border); flex: 1; overflow: hidden; }
+.score-fill span { display: block; height: 100%; border-radius: 4px; transition: width 0.3s; }
+
+/* Material list */
+.material-group { margin-bottom: 16px; }
+.material-group h4 { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; padding-left: 8px; border-left: 3px solid var(--primary); }
+.material-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; }
+.material-item .name { font-size: 14px; }
+.material-item .required { font-size: 11px; color: var(--danger); margin-left: 4px; }
+.material-item .status-badge { font-size: 12px; }
+
+/* AI suggestions */
+.suggestion-box { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 16px; margin: 12px 0; }
+.issue-box { background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; padding: 16px; margin: 12px 0; }
+.passed-box { background: #f0f5ff; border: 1px solid #91caff; border-radius: 8px; padding: 16px; margin: 12px 0; }
+.missing-box { background: #fff2f0; border: 1px solid #ffa39e; border-radius: 8px; padding: 16px; margin: 12px 0; }
+.suggestion-box ul, .issue-box ul, .passed-box ul, .missing-box ul { padding-left: 20px; margin-top: 4px; }
+.suggestion-box li, .passed-box li { margin: 4px 0; color: #135200; }
+.issue-box li { margin: 4px 0; color: #ad4e00; }
+.missing-box li { margin: 4px 0; color: #a8071a; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 24px; }
+.modal h2 { font-size: 18px; margin-bottom: 20px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+/* Misc */
+.mt-2 { margin-top: 12px; }
+.mb-2 { margin-bottom: 12px; }
+.flex { display: flex; }
+.flex-between { display: flex; justify-content: space-between; align-items: center; }
+.gap-2 { gap: 8px; }
+.text-center { text-align: center; }
+.text-secondary { color: var(--text-secondary); }
+
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .container { padding: 12px; }
+    .tabs { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+    <div>
+        <h1>📋 企业申报管理平台</h1>
+        <div class="subtitle">专精特新 — 申报材料提交 & 申报项目管理</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <span id="currentEnterprise" style="font-size:14px;">企业：广州测试科技有限公司</span>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- 统计 -->
+    <div class="stats-row" id="statsRow">
+        <div class="stat-card"><div class="num" id="statTotal">-</div><div class="label">总申报数</div></div>
+        <div class="stat-card"><div class="num" id="statDraft" style="color:#999">-</div><div class="label">草稿</div></div>
+        <div class="stat-card"><div class="num" id="statPending" style="color:#d48806">-</div><div class="label">审核中</div></div>
+        <div class="stat-card"><div class="num" id="statApproved" style="color:#389e0d">-</div><div class="label">已通过</div></div>
+        <div class="stat-card"><div class="num" id="statRejected" style="color:#cf1322">-</div><div class="label">已驳回</div></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="declarations">📄 申报项目管理</button>
+        <button class="tab-btn" data-tab="materials">📎 申报材料管理</button>
+        <button class="tab-btn" data-tab="new">➕ 新建申报</button>
+    </div>
+
+    <!-- ==================== Tab: 申报列表 ==================== -->
+    <div id="tab-declarations" class="tab-content">
+        <div class="card">
+            <div class="flex-between mb-2">
+                <div class="card-title" style="border:none;margin:0;padding:0;">申报项目列表</div>
+                <div class="flex gap-2">
+                    <select id="filterStatus" onchange="loadDeclarations()">
+                        <option value="">全部状态</option>
+                        <option value="DRAFT">草稿</option>
+                        <option value="PENDING">审核中</option>
+                        <option value="APPROVED">已通过</option>
+                        <option value="REJECTED">已驳回</option>
+                    </select>
+                    <select id="filterType" onchange="loadDeclarations()">
+                        <option value="">全部类型</option>
+                        <option value="XIAOJUREN">小巨人</option>
+                        <option value="PROVINCIAL">专精特新</option>
+                        <option value="INNOVATIVE">创新型</option>
+                    </select>
+                    <button class="btn btn-primary btn-sm" onclick="document.querySelector('[data-tab=new]').click()">+ 新建申报</button>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>申报编号</th>
+                            <th>企业名称</th>
+                            <th>类型</th>
+                            <th>级别</th>
+                            <th>年份</th>
+                            <th>状态</th>
+                            <th>评分</th>
+                            <th>提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="declTableBody">
+                        <tr><td colspan="9" class="text-center text-secondary">加载中...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== Tab: 材料管理 ==================== -->
+    <div id="tab-materials" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="flex-between mb-2">
+                <div class="card-title" style="border:none;margin:0;padding:0;">申报材料</div>
+                <div>
+                    <select id="materialDeclSelect" onchange="loadMaterials()">
+                        <option value="">-- 请选择申报项目 --</option>
+                    </select>
+                </div>
+            </div>
+            <div id="materialList"></div>
+        </div>
+    </div>
+
+    <!-- ==================== Tab: 新建/编辑申报 ==================== -->
+    <div id="tab-new" class="tab-content" style="display:none;">
+        <div class="card">
+            <div class="card-title" id="formTitle">新建申报项目</div>
+            <form id="declForm" onsubmit="return false;">
+
+                <!-- 基本信息 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">📌 基本信息</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>企业名称</label>
+                        <input name="enterpriseName" value="广州测试科技有限公司" required>
+                    </div>
+                    <div class="form-group">
+                        <label>申报类型</label>
+                        <select name="type" required>
+                            <option value="XIAOJUREN">国家级小巨人</option>
+                            <option value="PROVINCIAL">省级专精特新</option>
+                            <option value="INNOVATIVE">创新型中小企业</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>申报类别</label>
+                        <select name="category">
+                            <option value="认定">认定</option>
+                            <option value="复核">复核</option>
+                            <option value="重新申报">重新申报</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>年份</label>
+                        <input name="year" type="number" value="2026">
+                    </div>
+                </div>
+
+                <!-- 财务指标 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">💰 财务指标</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>营业收入（万元）</label>
+                        <input name="revenue" type="number" placeholder="≥1000万元">
+                    </div>
+                    <div class="form-group">
+                        <label>研发投入（万元）</label>
+                        <input name="rdInvestment" type="number" placeholder="≥100万元">
+                    </div>
+                    <div class="form-group">
+                        <label>研发投入占比（%）</label>
+                        <input name="rdRatio" type="number" step="0.1" placeholder="≥3%">
+                    </div>
+                    <div class="form-group">
+                        <label>资产负债率（%）</label>
+                        <input name="debtRatio" type="number" step="0.1" placeholder="建议≤70%">
+                    </div>
+                    <div class="form-group">
+                        <label>净利润（万元）</label>
+                        <input name="netProfit" type="number" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>主营业务收入（万元）</label>
+                        <input name="mainRevenue" type="number" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>近2年营收平均增长率（%）</label>
+                        <input name="revenueGrowth2yAvg" type="number" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>净利润率（%）</label>
+                        <input name="netProfitRate" type="number" step="0.1">
+                    </div>
+                </div>
+
+                <!-- 专业化指标 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">🏢 专业化指标</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>从事特定细分市场年限（年）</label>
+                        <input name="marketYears" type="number" placeholder="≥2年">
+                    </div>
+                    <div class="form-group">
+                        <label>主营业务收入占比（%）</label>
+                        <input name="mainRevenueRatio" type="number" step="0.1">
+                    </div>
+                    <div class="form-group full">
+                        <label>主导产品所属领域</label>
+                        <select name="leadProductDomain">
+                            <option value="">请选择</option>
+                            <option value="补短板">补短板</option>
+                            <option value="锻长板">锻长板</option>
+                            <option value="填空白">填空白</option>
+                            <option value="六基">六基领域</option>
+                            <option value="中华老字号">中华老字号</option>
+                            <option value="产业链龙头">产业链龙头</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>主导产品名称</label>
+                        <input name="productName" placeholder="如：智能测试平台">
+                    </div>
+                    <div class="form-group">
+                        <label>主导产品市场占有率（%）</label>
+                        <input name="productMarketShare" type="number" step="0.01">
+                    </div>
+                </div>
+
+                <!-- 精细化指标 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">🔬 精细化指标</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>数字化水平等级</label>
+                        <select name="digitalLevel">
+                            <option value="0">未评级</option>
+                            <option value="1">一级</option>
+                            <option value="2">二级</option>
+                            <option value="3">三级</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>市场占有率（%）</label>
+                        <input name="marketShare" type="number" step="0.01">
+                    </div>
+                </div>
+
+                <!-- 质量管理 -->
+                <div style="display:flex;flex-wrap:wrap;gap:16px;margin:8px 0;">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityAwardProvincial" type="checkbox"> 省级以上质量奖</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityIso" type="checkbox"> ISO9001认证</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityBrand" type="checkbox"> 自有品牌</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityStandard" type="checkbox"> 参与标准制定</label>
+                </div>
+
+                <!-- 创新能力 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">💡 创新能力指标</h4>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>发明专利数</label>
+                        <input name="patentCount" type="number" placeholder="≥2件">
+                    </div>
+                    <div class="form-group">
+                        <label>Ⅰ类高价值知识产权</label>
+                        <input name="ipHighValue" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label>自主研发Ⅰ类知识产权</label>
+                        <input name="ipClass1Self" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label>Ⅰ类知识产权</label>
+                        <input name="ipClass1" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label>Ⅱ类知识产权</label>
+                        <input name="ipClass2" type="number">
+                    </div>
+                    <div class="form-group">
+                        <label>研发人员占比（%）</label>
+                        <input name="rdStaffRatio" type="number" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>研发机构级别</label>
+                        <select name="rdInstitutionLevel">
+                            <option value="">请选择</option>
+                            <option value="国家级">国家级</option>
+                            <option value="省级">省级</option>
+                            <option value="市级">市级</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>近2年股权融资（万元）</label>
+                        <input name="equityFinancing2y" type="number" step="0.1">
+                    </div>
+                </div>
+
+                <!-- 特色化指标 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">⭐ 特色化指标（广东）</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:8px 0;">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureKeyIndustry" type="checkbox"> 重点领域</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureSpecialTech" type="checkbox"> 特色工艺技术</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureFirstSet" type="checkbox"> 首台套</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureGreenMfg" type="checkbox"> 绿色制造</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureChuangke" type="checkbox"> 创客广东</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureDesignAward" type="checkbox"> 省长杯设计奖</label>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 12px;">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentNational" type="checkbox"> 国家级人才</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentProvincial" type="checkbox"> 省级人才</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentCity" type="checkbox"> 市级人才</label>
+                </div>
+
+                <!-- 直通条件 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">🏆 直通条件</h4>
+                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 12px;">
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directTechAward" type="checkbox"> 省级科技奖</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directNationalAward" type="checkbox"> 国家级科技奖</label>
+                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directChuangke" type="checkbox"> 创客中国500强</label>
+                </div>
+
+                <!-- 补充说明 -->
+                <h4 style="margin:16px 0 8px;color:var(--primary);">📝 补充说明</h4>
+                <div class="form-grid">
+                    <div class="form-group full">
+                        <label>产业链配套说明</label>
+                        <textarea name="chainDescription" rows="3" placeholder="请描述企业在产业链中的位置、配套情况..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Hidden -->
+                <input name="enterpriseId" type="hidden" value="1">
+                <input name="id" type="hidden" value="">
+
+                <!-- 操作按钮 -->
+                <div class="modal-actions" style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px;">
+                    <button type="button" class="btn btn-outline" onclick="resetForm()">重置</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDeclaration()">💾 保存草稿</button>
+                    <button type="button" class="btn btn-success" onclick="saveAndSubmit()">📨 保存并提交</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- AI评估结果 -->
+        <div id="aiResultBox" style="display:none;"></div>
+    </div>
+</div>
+
+<!-- ==================== Detail Modal ==================== -->
+<div class="modal-overlay" id="detailModal">
+    <div class="modal">
+        <div class="flex-between mb-2">
+            <h2 style="margin:0;">📋 申报详情</h2>
+            <button class="btn btn-outline btn-sm" onclick="closeDetail()">✕ 关闭</button>
+        </div>
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<script>
+const API = '/api';
+
+// ==================== Data Loading ====================
+
+async function loadStats() {
+    try {
+        const res = await fetch(API + '/dashboard/stats');
+        const data = await res.json();
+        document.getElementById('statTotal').textContent = data.total || 0;
+        document.getElementById('statDraft').textContent = data.draft || 0;
+        document.getElementById('statPending').textContent = data.pending || 0;
+        document.getElementById('statApproved').textContent = data.approved || 0;
+        document.getElementById('statRejected').textContent = data.rejected || 0;
+    } catch(e) { console.error('loadStats error:', e); }
+}
+
+async function loadDeclarations() {
+    const status = document.getElementById('filterStatus').value;
+    const type = document.getElementById('filterType').value;
+    try {
+        const res = await fetch(API + `/declarations?keyword=&status=${status}&type=${type}&page=0&size=100`);
+        const data = await res.json();
+        renderDeclTable(data.content || []);
+    } catch(e) {
+        document.getElementById('declTableBody').innerHTML = '<tr><td colspan="9" class="text-center text-secondary">加载失败</td></tr>';
+    }
+}
+
+function renderDeclTable(list) {
+    const tbody = document.getElementById('declTableBody');
+    if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-secondary">暂无申报项目</td></tr>';
+        return;
+    }
+    tbody.innerHTML = list.map(d => {
+        const statusClass = {DRAFT:'badge-draft', PENDING:'badge-pending', SUBMITTED:'badge-pending', APPROVED:'badge-approved', REJECTED:'badge-rejected'}[d.status] || 'badge-draft';
+        const statusText = {DRAFT:'草稿', PENDING:'审核中', SUBMITTED:'待审核', APPROVED:'已通过', REJECTED:'已驳回'}[d.status] || d.status;
+        const typeText = {XIAOJUREN:'小巨人', PROVINCIAL:'专精特新', INNOVATIVE:'创新型'}[d.type] || d.type;
+        return `<tr>
+            <td>${d.declarationCode || '-'}</td>
+            <td>${d.enterpriseName || '-'}</td>
+            <td>${typeText}</td>
+            <td>${d.level || '-'}</td>
+            <td>${d.year || '-'}</td>
+            <td><span class="badge ${statusClass}">${statusText}</span></td>
+            <td>${d.totalScore != null ? d.totalScore + '分' : '-'}</td>
+            <td>${d.submitTime ? new Date(d.submitTime).toLocaleDateString() : '-'}</td>
+            <td class="btn-group">
+                <button class="btn btn-outline btn-sm" onclick="viewDetail(${d.id})">查看</button>
+                ${d.status === 'DRAFT' ? `<button class="btn btn-primary btn-sm" onclick="editDecl(${d.id})">编辑</button>` : ''}
+                ${d.status === 'DRAFT' ? `<button class="btn btn-success btn-sm" onclick="submitDecl(${d.id})">提交</button>` : ''}
+                ${d.status !== 'APPROVED' ? `<button class="btn btn-outline btn-sm" onclick="aiEval(${d.id})">AI评估</button>` : ''}
+                ${d.status === 'DRAFT' ? `<button class="btn btn-danger btn-sm" onclick="deleteDecl(${d.id})">删除</button>` : ''}
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+// ==================== Tab Switching ====================
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+        const tab = this.dataset.tab;
+        document.getElementById('tab-' + tab).style.display = 'block';
+        if (tab === 'declarations') { loadDeclarations(); loadStats(); }
+        if (tab === 'materials') { loadDeclSelect(); loadMaterials(); }
+        if (tab === 'new') { resetForm(); }
+    });
+});
+
+// ==================== CRUD Operations ====================
+
+function getFormData() {
+    const form = document.getElementById('declForm');
+    const data = {};
+    new FormData(form).forEach((v, k) => { data[k] = v; });
+    // Checkboxes: send boolean
+    ['qualityAwardProvincial','qualityIso','qualityBrand','qualityStandard',
+     'featureKeyIndustry','featureSpecialTech','featureFirstSet','featureGreenMfg',
+     'featureChuangke','featureDesignAward','talentNational','talentProvincial','talentCity',
+     'talentRecommend','directTechAward','directNationalAward','directChuangke'].forEach(f => {
+        data[f] = document.querySelector(`[name="${f}"]`).checked;
+    });
+    // Numeric conversion
+    ['revenue','rdInvestment','rdRatio','debtRatio','patentCount','marketShare',
+     'productMarketShare','marketYears','equityFinancing2y','netProfit','mainRevenue',
+     'mainRevenueRatio','revenueGrowth2yAvg','netProfitRate','digitalLevel',
+     'ipHighValue','ipClass1Self','ipClass1','ipClass2','rdStaffRatio',
+     'year','materialCompleteness','totalScore'].forEach(f => {
+        if (data[f] !== undefined && data[f] !== '') data[f] = Number(data[f]);
+        else delete data[f];
+    });
+    if (data.leadProductDomain === '') data.leadProductDomain = undefined;
+    if (data.rdInstitutionLevel === '') data.rdInstitutionLevel = undefined;
+    if (data.chainDescription === '') data.chainDescription = undefined;
+    if (data.productName === '') data.productName = undefined;
+    if (data.marketShare === '') delete data.marketShare;
+    const id = data.id; delete data.id;
+    if (!id) delete data.id;
+    return { id, ...data };
+}
+
+async function saveDeclaration() {
+    const data = getFormData();
+    const isEdit = !!data.id;
+    try {
+        const url = isEdit ? API + '/declarations/' + data.id : API + '/declarations';
+        const method = isEdit ? 'PUT' : 'POST';
+        const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
+        if (!res.ok) { const err = await res.json(); alert('保存失败: ' + (err.message || '未知错误')); return; }
+        const saved = await res.json();
+        alert(isEdit ? '✅ 保存成功' : '✅ 创建成功');
+        showAiResult(saved);
+        document.querySelector('[data-tab=declarations]').click();
+    } catch(e) { alert('保存失败: ' + e.message); }
+}
+
+async function saveAndSubmit() {
+    const data = getFormData();
+    const isEdit = !!data.id;
+    try {
+        let saved;
+        if (isEdit) {
+            const res = await fetch(API + '/declarations/' + data.id, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+            if (!res.ok) throw await res.json();
+            saved = await res.json();
+        } else {
+            const res = await fetch(API + '/declarations', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
+            if (!res.ok) throw await res.json();
+            saved = await res.json();
+        }
+        const res2 = await fetch(API + '/declarations/' + saved.id + '/submit', { method:'POST' });
+        if (!res2.ok) { const err = await res2.json(); alert('提交失败: ' + (err.message || '未知错误')); return; }
+        const submitted = await res2.json();
+        alert('✅ 提交成功！申报编号: ' + (submitted.declarationCode || '待生成'));
+        showAiResult(submitted);
+        document.querySelector('[data-tab=declarations]').click();
+    } catch(e) { alert('操作失败: ' + (e.message || JSON.stringify(e))); }
+}
+
+async function submitDecl(id) {
+    if (!confirm('确定要提交该申报项目吗？提交后将进入审核流程。')) return;
+    try {
+        const res = await fetch(API + '/declarations/' + id + '/submit', { method:'POST' });
+        if (!res.ok) { const err = await res.json(); alert('提交失败: ' + (err.message || '未知错误')); return; }
+        const data = await res.json();
+        alert('✅ 提交成功！申报编号: ' + (data.declarationCode || '待生成'));
+        showAiResult(data);
+        loadDeclarations(); loadStats();
+    } catch(e) { alert('提交失败: ' + e.message); }
+}
+
+async function deleteDecl(id) {
+    if (!confirm('确定要删除该申报项目吗？此操作不可恢复。')) return;
+    try {
+        await fetch(API + '/declarations/' + id, { method:'DELETE' });
+        alert('✅ 已删除');
+        loadDeclarations(); loadStats();
+    } catch(e) { alert('删除失败: ' + e.message); }
+}
+
+async function aiEval(id) {
+    try {
+        const res = await fetch(API + '/declarations/' + id + '/ai-evaluate', { method:'POST' });
+        if (!res.ok) { const err = await res.json(); alert('AI评估失败: ' + (err.message || '未知错误')); return; }
+        const data = await res.json();
+        alert('✅ AI评估完成');
+        showAiResult(data);
+        loadDeclarations();
+    } catch(e) { alert('AI评估失败: ' + e.message); }
+}
+
+// ==================== View Detail ====================
+
+async function viewDetail(id) {
+    try {
+        const res = await fetch(API + '/declarations/' + id);
+        if (!res.ok) return alert('获取详情失败');
+        const d = await res.json();
+        const typeText = {XIAOJUREN:'小巨人', PROVINCIAL:'专精特新', INNOVATIVE:'创新型'}[d.type] || d.type;
+        const statusText = {DRAFT:'草稿', PENDING:'审核中', SUBMITTED:'待审核', APPROVED:'已通过', REJECTED:'已驳回'}[d.status] || d.status;
+        const statusClass = {DRAFT:'badge-draft', PENDING:'badge-pending', SUBMITTED:'badge-pending', APPROVED:'badge-approved', REJECTED:'badge-rejected'}[d.status] || 'badge-draft';
+
+        let scoresHtml = '';
+        if (d.totalScore != null) {
+            const pct = Math.min(d.totalScore, 100);
+            const color = pct >= 70 ? '#52c41a' : pct >= 50 ? '#faad14' : '#ff4d4f';
+            scoresHtml = `
+            <div class="card">
+                <div class="card-title">📊 AI评分结果</div>
+                <div style="font-size:36px;font-weight:700;color:${color};">${d.totalScore}分</div>
+                <div class="score-bar">
+                    <span style="font-size:13px;width:80px;">专业化 ${d.professionalScore||0}/25</span>
+                    <div class="score-fill"><span style="width:${(d.professionalScore||0)/25*100}%;background:#1677ff;"></span></div>
+                </div>
+                <div class="score-bar">
+                    <span style="font-size:13px;width:80px;">精细化 ${d.refinedScore||0}/25</span>
+                    <div class="score-fill"><span style="width:${(d.refinedScore||0)/25*100}%;background:#52c41a;"></span></div>
+                </div>
+                <div class="score-bar">
+                    <span style="font-size:13px;width:80px;">特色化 ${d.featureScore||0}/15</span>
+                    <div class="score-fill"><span style="width:${(d.featureScore||0)/15*100}%;background:#722ed1;"></span></div>
+                </div>
+                <div class="score-bar">
+                    <span style="font-size:13px;width:80px;">创新 ${d.innovationScoreDetail||0}/35</span>
+                    <div class="score-fill"><span style="width:${(d.innovationScoreDetail||0)/35*100}%;background:#fa8c16;"></span></div>
+                </div>
+                <div style="margin-top:8px;">
+                    <span class="badge ${d.declarationEligible ? 'badge-approved' : 'badge-rejected'}">${d.declarationEligible ? '✅ 符合申报条件' : '❌ 不符合申报条件'}</span>
+                    <span style="margin-left:8px;font-size:13px;color:var(--text-secondary);">${d.eligibleReason||''}</span>
+                </div>
+            </div>`;
+        }
+
+        let aiHtml = '';
+        const parseList = (json) => { try { return JSON.parse(json); } catch(e) { return []; } };
+        if (d.aiSuggestions && d.aiSuggestions !== '[]') {
+            const items = parseList(d.aiSuggestions);
+            if (items.length) aiHtml += `<div class="suggestion-box"><strong>💡 建议</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+        }
+        if (d.aiIssues && d.aiIssues !== '[]') {
+            const items = parseList(d.aiIssues);
+            if (items.length) aiHtml += `<div class="issue-box"><strong>⚠️ 问题</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+        }
+        if (d.aiPassedItems && d.aiPassedItems !== '[]') {
+            const items = parseList(d.aiPassedItems);
+            if (items.length) aiHtml += `<div class="passed-box"><strong>✅ 已通过项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+        }
+        if (d.aiMissingItems && d.aiMissingItems !== '[]') {
+            const items = parseList(d.aiMissingItems);
+            if (items.length) aiHtml += `<div class="missing-box"><strong>❌ 需补充项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+        }
+
+        document.getElementById('detailContent').innerHTML = `
+            <div class="card">
+                <div class="flex-between">
+                    <div><strong>${d.enterpriseName||'-'}</strong> <span class="badge ${statusClass}">${statusText}</span></div>
+                    <span class="text-secondary">${d.declarationCode || '无编号'}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px;">
+                    <div><span class="text-secondary">类型：</span>${typeText}</div>
+                    <div><span class="text-secondary">级别：</span>${d.level||'-'}</div>
+                    <div><span class="text-secondary">类别：</span>${d.category||'-'}</div>
+                    <div><span class="text-secondary">年份：</span>${d.year||'-'}</div>
+                    <div><span class="text-secondary">提交时间：</span>${d.submitTime ? new Date(d.submitTime).toLocaleString() : '-'}</div>
+                    <div><span class="text-secondary">材料完整度：</span>${d.materialCompleteness || 0}%</div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📊 财务数据</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                    <div><span class="text-secondary">营收：</span>${d.revenue ? d.revenue+'万元' : '-'}</div>
+                    <div><span class="text-secondary">研发投入：</span>${d.rdInvestment ? d.rdInvestment+'万元' : '-'}</div>
+                    <div><span class="text-secondary">研发占比：</span>${d.rdRatio != null ? d.rdRatio+'%' : '-'}</div>
+                    <div><span class="text-secondary">资产负债率：</span>${d.debtRatio != null ? d.debtRatio+'%' : '-'}</div>
+                    <div><span class="text-secondary">净利润：</span>${d.netProfit != null ? d.netProfit+'万元' : '-'}</div>
+                    <div><span class="text-secondary">发明专利：</span>${d.patentCount != null ? d.patentCount+'件' : '-'}</div>
+                    <div><span class="text-secondary">主导产品：</span>${d.productName||'-'}</div>
+                    <div><span class="text-secondary">市场占有率：</span>${d.productMarketShare != null ? d.productMarketShare+'%' : '-'}</div>
+                </div>
+            </div>
+            ${scoresHtml}
+            ${aiHtml}
+            ${d.reviewComment ? `<div class="card"><div class="card-title">📝 审核意见</div><p>${d.reviewComment}</p></div>` : ''}
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+                ${d.status === 'DRAFT' ? `<button class="btn btn-primary" onclick="editDecl(${d.id});closeDetail();">编辑</button>` : ''}
+                ${d.status === 'DRAFT' ? `<button class="btn btn-success" onclick="submitDecl(${d.id})">提交</button>` : ''}
+                <button class="btn btn-outline" onclick="closeDetail()">关闭</button>
+            </div>
+        `;
+        document.getElementById('detailModal').classList.add('active');
+    } catch(e) { alert('获取详情失败: ' + e.message); }
+}
+
+function closeDetail() {
+    document.getElementById('detailModal').classList.remove('active');
+}
+
+// ==================== Edit Declaration ====================
+
+async function editDecl(id) {
+    try {
+        const res = await fetch(API + '/declarations/' + id);
+        const d = await res.json();
+        populateForm(d);
+        document.querySelector('[data-tab=new]').click();
+    } catch(e) { alert('加载编辑数据失败: ' + e.message); }
+}
+
+function populateForm(d) {
+    const form = document.getElementById('declForm');
+    Object.keys(d).forEach(k => {
+        const el = form.querySelector(`[name="${k}"]`);
+        if (!el) return;
+        if (el.type === 'checkbox') el.checked = !!d[k];
+        else if (d[k] != null) el.value = d[k];
+    });
+    document.getElementById('formTitle').textContent = '编辑申报项目 (ID: ' + d.id + ')';
+}
+
+function resetForm() {
+    document.getElementById('declForm').reset();
+    document.querySelectorAll('#declForm input[type=checkbox]').forEach(c => c.checked = false);
+    document.getElementById('formTitle').textContent = '新建申报项目';
+    document.getElementById('declForm').querySelector('[name="id"]').value = '';
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+    document.querySelector('[data-tab="declarations"]').classList.add('active');
+    document.getElementById('tab-declarations').style.display = 'block';
+    loadDeclarations();
+    loadStats();
+}
+
+function showAiResult(d) {
+    const box = document.getElementById('aiResultBox');
+    const parseList = (json) => { try { return JSON.parse(json); } catch(e) { return []; } };
+    let html = '<div class="card"><div class="card-title">🤖 AI 评估报告</div>';
+    if (d.totalScore != null) {
+        const color = d.totalScore >= 70 ? '#52c41a' : '#ff4d4f';
+        html += `<div style="font-size:24px;font-weight:700;color:${color};">总分: ${d.totalScore}分</div>`;
+    }
+    if (d.declarationEligible != null) {
+        html += `<p><span class="badge ${d.declarationEligible ? 'badge-approved' : 'badge-rejected'}">${d.declarationEligible ? '符合申报条件' : '不符合申报条件'}</span></p>`;
+    }
+    if (d.aiSuggestions && d.aiSuggestions !== '[]') {
+        const items = parseList(d.aiSuggestions);
+        if (items.length) html += `<div class="suggestion-box"><strong>💡 建议</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+    }
+    if (d.aiPassedItems && d.aiPassedItems !== '[]') {
+        const items = parseList(d.aiPassedItems);
+        if (items.length) html += `<div class="passed-box"><strong>✅ 已通过项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+    }
+    if (d.aiMissingItems && d.aiMissingItems !== '[]') {
+        const items = parseList(d.aiMissingItems);
+        if (items.length) html += `<div class="missing-box"><strong>❌ 需补充</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+    }
+    if (d.aiIssues && d.aiIssues !== '[]') {
+        const items = parseList(d.aiIssues);
+        if (items.length) html += `<div class="issue-box"><strong>⚠️ 问题</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
+    }
+    html += '</div>';
+    box.innerHTML = html;
+    box.style.display = 'block';
+}
+
+// ==================== Materials ====================
+
+async function loadDeclSelect() {
+    try {
+        const res = await fetch(API + '/declarations?keyword=&status=&type=&page=0&size=100');
+        const data = await res.json();
+        const sel = document.getElementById('materialDeclSelect');
+        const current = sel.value;
+        sel.innerHTML = '<option value="">-- 请选择申报项目 --</option>' +
+            (data.content || []).map(d => `<option value="${d.id}">${d.declarationCode||'#'+d.id} ${d.enterpriseName||''} (${d.type})</option>`).join('');
+        if (current) sel.value = current;
+    } catch(e) { console.error(e); }
+}
+
+async function loadMaterials() {
+    const declId = document.getElementById('materialDeclSelect').value;
+    const container = document.getElementById('materialList');
+    if (!declId) {
+        container.innerHTML = '<div class="text-center text-secondary" style="padding:40px;">请先选择一个申报项目</div>';
+        return;
+    }
+    try {
+        const res = await fetch(API + '/declarations/' + declId + '/materials');
+        if (!res.ok) { container.innerHTML = '<div class="text-secondary">加载失败</div>'; return; }
+        const items = await res.json();
+        if (!items.length) {
+            container.innerHTML = '<div class="text-secondary">该申报暂无材料清单</div>';
+            return;
+        }
+        const groups = {};
+        items.forEach(m => {
+            if (!groups[m.materialType]) groups[m.materialType] = [];
+            groups[m.materialType].push(m);
+        });
+        const statusMap = {MISSING:'缺失', UPLOADED:'已上传', IDENTIFIED:'已识别', VERIFIED:'已确认'};
+        const statusClass = {MISSING:'badge-rejected', UPLOADED:'badge-pending', IDENTIFIED:'badge-pending', VERIFIED:'badge-approved'};
+        let html = '';
+        Object.entries(groups).forEach(([group, mats]) => {
+            html += `<div class="material-group"><h4>${group}</h4>`;
+            mats.forEach(m => {
+                html += `<div class="material-item">
+                    <div>
+                        <span class="name">${m.materialName}</span>
+                        ${m.required === 1 ? '<span class="required">*必交</span>' : '<span class="text-secondary" style="font-size:11px;">选交</span>'}
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="badge ${statusClass[m.status]||'badge-draft'}">${statusMap[m.status]||m.status}</span>
+                        <button class="btn btn-outline btn-sm" onclick="updateMaterialStatus(${m.id},'UPLOADED')">标记上传</button>
+                    </div>
+                </div>`;
+            });
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    } catch(e) { container.innerHTML = '<div class="text-secondary">加载失败: ' + e.message + '</div>'; }
+}
+
+async function updateMaterialStatus(materialId, status) {
+    try {
+        const res = await fetch(API + '/declarations/materials/' + materialId, {
+            method:'PUT',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({status})
+        });
+        if (!res.ok) { const err = await res.json(); alert('操作失败: ' + (err.message||'')); return; }
+        loadMaterials();
+    } catch(e) { alert('操作失败: ' + e.message); }
+}
+
+// ==================== Init ====================
+
+// Click outside modal to close
+document.getElementById('detailModal').addEventListener('click', function(e) {
+    if (e.target === this) closeDetail();
+});
+
+loadStats();
+loadDeclarations();
+</script>
+</body>
+</html>
