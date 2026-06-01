@@ -3,865 +3,681 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>企业申报管理平台</title>
+<title>专精特新"小巨人"申报系统</title>
 <style>
-:root { --primary: #1677ff; --success: #52c41a; --warning: #faad14; --danger: #ff4d4f; --bg: #f5f7fa; --card-bg: #fff; --text: #333; --text-secondary: #666; --border: #e8e8e8; }
+:root {
+  --primary: #1677ff; --success: #52c41a; --warning: #faad14; --danger: #ff4d4f;
+  --bg: #f0f2f5; --card-bg: #fff; --text: #262626; --text2: #8c8c8c;
+  --border: #e8e8e8; --radius: 8px; --shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-.app-header { background: linear-gradient(135deg, #1677ff 0%, #0958d9 100%); color: #fff; padding: 16px 32px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-.app-header h1 { font-size: 20px; font-weight: 600; }
-.app-header .subtitle { font-size: 13px; opacity: 0.8; margin-top: 2px; }
-.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+body { font-family: -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.header { background: linear-gradient(135deg,#1677ff,#0958d9); color:#fff; padding:16px 32px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.12); position:sticky; top:0; z-index:100; }
+.header h1 { font-size:20px; font-weight:600; }
+.header .sub { font-size:12px; opacity:.75; margin-top:2px; }
+.container { max-width:1360px; margin:0 auto; padding:20px 24px; }
 
-/* Tabs */
-.tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--card-bg); border-radius: 8px 8px 0 0; overflow: hidden; border: 1px solid var(--border); border-bottom: none; }
-.tab-btn { flex: 1; padding: 14px 20px; border: none; background: #fafafa; cursor: pointer; font-size: 15px; font-weight: 500; color: var(--text-secondary); transition: all 0.2s; border-bottom: 2px solid transparent; }
-.tab-btn:hover { background: #f0f5ff; color: var(--primary); }
-.tab-btn.active { background: #fff; color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+/* Stats row */
+.stats { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:12px; margin-bottom:20px; }
+.stat-card { background:var(--card-bg); border-radius:var(--radius); border:1px solid var(--border); padding:16px; text-align:center; box-shadow:var(--shadow); }
+.stat-card .num { font-size:28px; font-weight:700; }
+.stat-card .lbl { font-size:12px; color:var(--text2); margin-top:4px; }
 
-/* Cards */
-.card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 24px; margin-bottom: 16px; }
-.card-title { font-size: 16px; font-weight: 600; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-.form-group { display: flex; flex-direction: column; }
-.form-group.full { grid-column: 1 / -1; }
-.form-group label { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 500; }
-.form-group input, .form-group select, .form-group textarea { padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 14px; outline: none; transition: border-color 0.2s; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(22,119,255,0.1); }
-.form-group textarea { resize: vertical; min-height: 60px; }
-.form-group .hint { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+/* Module Tabs */
+.module-tabs { display:flex; gap:0; margin-bottom:0; background:var(--card-bg); border-radius:var(--radius) var(--radius) 0 0; overflow-x:auto; border:1px solid var(--border); border-bottom:none; }
+.module-tab { padding:11px 18px; border:none; background:#fafafa; cursor:pointer; font-size:13px; font-weight:500; color:var(--text2); white-space:nowrap; border-bottom:2px solid transparent; transition:all .2s; }
+.module-tab:hover { background:#f0f5ff; color:var(--primary); }
+.module-tab.active { background:#fff; color:var(--primary); border-bottom-color:var(--primary); font-weight:600; }
+.module-tab .badge { display:inline-block; background:#f0f0f0; color:#999; font-size:10px; border-radius:8px; padding:0 6px; margin-left:4px; }
+
+/* Content */
+.form-wrap { background:var(--card-bg); border-radius:0 0 var(--radius) var(--radius); border:1px solid var(--border); border-top:none; padding:24px; }
+.module-pane { display:none; }
+.module-pane.active { display:block; }
+.section-title { font-size:15px; font-weight:600; margin:20px 0 12px; padding-bottom:8px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:8px; }
+.section-title:first-child { margin-top:0; }
+.section-title .count { font-size:11px; color:var(--text2); font-weight:400; }
+
+/* Grid layout */
+.form-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+.form-group { display:flex; flex-direction:column; }
+.form-group.full { grid-column:1/-1; }
+.form-group.wide { grid-column:span 2; }
+.form-group label { font-size:12px; color:var(--text2); margin-bottom:3px; font-weight:500; }
+.form-group .val { padding:6px 10px; border:1px solid var(--border); border-radius:6px; font-size:14px; background:#fafafa; min-height:34px; display:flex; align-items:center; }
+.form-group input,.form-group select,.form-group textarea { padding:7px 10px; border:1px solid var(--border); border-radius:6px; font-size:14px; outline:none; transition:border-color .2s; background:#fff; }
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus { border-color:var(--primary); box-shadow:0 0 0 2px rgba(22,119,255,.1); }
+.form-group textarea { resize:vertical; min-height:56px; }
+.form-group .hint { font-size:11px; color:var(--text2); margin-top:2px; }
+
+/* Table inside form */
+.sub-table { width:100%; border-collapse:collapse; font-size:13px; margin:8px 0; }
+.sub-table th,.sub-table td { padding:6px 10px; text-align:left; border:1px solid var(--border); }
+.sub-table th { background:#fafafa; font-weight:600; color:var(--text2); font-size:12px; }
+.sub-table input,.sub-table select { width:100%; padding:4px 6px; border:1px solid var(--border); border-radius:4px; font-size:12px; }
+
+/* Badges */
+.badge { display:inline-block; padding:1px 8px; border-radius:8px; font-size:11px; font-weight:500; }
+.badge-blue { background:#e6f4ff; color:#1677ff; }
+.badge-green { background:#f6ffed; color:#52c41a; }
+.badge-orange { background:#fff7e6; color:#d48806; }
+.badge-red { background:#fff2f0; color:#cf1322; }
+.badge-gray { background:#f5f5f5; color:#999; }
 
 /* Buttons */
-.btn { padding: 8px 20px; border-radius: 6px; border: 1px solid var(--border); font-size: 14px; cursor: pointer; transition: all 0.2s; font-weight: 500; display: inline-flex; align-items: center; gap: 6px; }
-.btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
-.btn-primary:hover { background: #4096ff; }
-.btn-success { background: var(--success); color: #fff; border-color: var(--success); }
-.btn-success:hover { opacity: 0.85; }
-.btn-danger { background: #fff; color: var(--danger); border-color: var(--danger); }
-.btn-danger:hover { background: #fff2f0; }
-.btn-outline { background: #fff; color: var(--text); }
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-.btn-sm { padding: 4px 12px; font-size: 12px; }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* Table */
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-th { background: #fafafa; font-weight: 600; color: var(--text-secondary); font-size: 13px; white-space: nowrap; }
-tr:hover td { background: #f0f5ff; }
-
-/* Badge */
-.badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: 12px; font-weight: 500; }
-.badge-draft { background: #f5f5f5; color: #999; }
-.badge-pending { background: #fff7e6; color: #d48806; }
-.badge-approved { background: #f6ffed; color: #389e0d; }
-.badge-rejected { background: #fff2f0; color: #cf1322; }
-
-/* Status bar & score */
-.stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px; }
-.stat-card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); padding: 16px; text-align: center; }
-.stat-card .num { font-size: 28px; font-weight: 700; color: var(--primary); }
-.stat-card .label { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
-.score-bar { display: flex; gap: 8px; align-items: center; margin: 8px 0; }
-.score-fill { height: 8px; border-radius: 4px; background: var(--border); flex: 1; overflow: hidden; }
-.score-fill span { display: block; height: 100%; border-radius: 4px; transition: width 0.3s; }
-
-/* Material list */
-.material-group { margin-bottom: 16px; }
-.material-group h4 { font-size: 14px; color: var(--text-secondary); margin-bottom: 8px; padding-left: 8px; border-left: 3px solid var(--primary); }
-.material-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px; }
-.material-item .name { font-size: 14px; }
-.material-item .required { font-size: 11px; color: var(--danger); margin-left: 4px; }
-.material-item .status-badge { font-size: 12px; }
-
-/* AI suggestions */
-.suggestion-box { background: #f6ffed; border: 1px solid #b7eb8f; border-radius: 8px; padding: 16px; margin: 12px 0; }
-.issue-box { background: #fff7e6; border: 1px solid #ffd591; border-radius: 8px; padding: 16px; margin: 12px 0; }
-.passed-box { background: #f0f5ff; border: 1px solid #91caff; border-radius: 8px; padding: 16px; margin: 12px 0; }
-.missing-box { background: #fff2f0; border: 1px solid #ffa39e; border-radius: 8px; padding: 16px; margin: 12px 0; }
-.suggestion-box ul, .issue-box ul, .passed-box ul, .missing-box ul { padding-left: 20px; margin-top: 4px; }
-.suggestion-box li, .passed-box li { margin: 4px 0; color: #135200; }
-.issue-box li { margin: 4px 0; color: #ad4e00; }
-.missing-box li { margin: 4px 0; color: #a8071a; }
-
-/* Modal */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 1000; align-items: center; justify-content: center; }
-.modal-overlay.active { display: flex; }
-.modal { background: #fff; border-radius: 12px; width: 90%; max-width: 800px; max-height: 90vh; overflow-y: auto; padding: 24px; }
-.modal h2 { font-size: 18px; margin-bottom: 20px; }
-.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
-
-/* Misc */
-.mt-2 { margin-top: 12px; }
-.mb-2 { margin-bottom: 12px; }
-.flex { display: flex; }
-.flex-between { display: flex; justify-content: space-between; align-items: center; }
-.gap-2 { gap: 8px; }
-.text-center { text-align: center; }
-.text-secondary { color: var(--text-secondary); }
-
-@media (max-width: 768px) {
-    .form-grid { grid-template-columns: 1fr; }
-    .container { padding: 12px; }
-    .tabs { flex-direction: column; }
-}
+.btn { padding:7px 18px; border-radius:6px; border:1px solid var(--border); font-size:13px; cursor:pointer; transition:all .2s; font-weight:500; display:inline-flex; align-items:center; gap:5px; }
+.btn-primary { background:var(--primary); color:#fff; border-color:var(--primary); }
+.btn-primary:hover { background:#4096ff; }
+.btn-success { background:var(--success); color:#fff; border-color:var(--success); }
+.btn-success:hover { opacity:.85; }
+.btn-danger { background:#fff; color:var(--danger); border-color:var(--danger); }
+.btn-danger:hover { background:#fff2f0; }
+.btn-outline { background:#fff; color:var(--text); }
+.btn-outline:hover { border-color:var(--primary); color:var(--primary); }
+.btn-sm { padding:4px 10px; font-size:12px; }
+.btn-group { display:flex; gap:8px; flex-wrap:wrap; margin-top:16px; justify-content:flex-end; border-top:1px solid var(--border); padding-top:16px; }
+.flex { display:flex; }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.gap-2 { gap:8px; }
+.text-center { text-align:center; }
+.text-secondary { color:var(--text2); }
+.mb-2 { margin-bottom:12px; }
+.mt-2 { margin-top:12px; }
+.col-span-2 { grid-column:span 2; }
+@media(max-width:768px){ .form-grid{grid-template-columns:1fr;} .col-span-2{grid-column:span 1;} .module-tab{padding:8px 12px;font-size:12px;} }
 </style>
 </head>
 <body>
 
-<div class="app-header">
-    <div>
-        <h1>📋 企业申报管理平台</h1>
-        <div class="subtitle">专精特新 — 申报材料提交 & 申报项目管理</div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-        <span id="currentEnterprise" style="font-size:14px;">企业：广州测试科技有限公司</span>
-    </div>
+<div class="header">
+  <div>
+    <h1>🏭 专精特新"小巨人"申报系统</h1>
+    <div class="sub">数据字典全覆盖 · 12 大模块 · {{totalFields}} 个字段</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span class="badge badge-green" id="statusBadge">● 已登录</span>
+    <span style="font-size:13px;">广州测试科技有限公司</span>
+  </div>
 </div>
 
 <div class="container">
 
-    <!-- 统计 -->
-    <div class="stats-row" id="statsRow">
-        <div class="stat-card"><div class="num" id="statTotal">-</div><div class="label">总申报数</div></div>
-        <div class="stat-card"><div class="num" id="statDraft" style="color:#999">-</div><div class="label">草稿</div></div>
-        <div class="stat-card"><div class="num" id="statPending" style="color:#d48806">-</div><div class="label">审核中</div></div>
-        <div class="stat-card"><div class="num" id="statApproved" style="color:#389e0d">-</div><div class="label">已通过</div></div>
-        <div class="stat-card"><div class="num" id="statRejected" style="color:#cf1322">-</div><div class="label">已驳回</div></div>
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card"><div class="num" style="color:var(--primary)">12</div><div class="lbl">数据模块</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--primary)" id="totalFieldCount">0</div><div class="lbl">总字段数</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--success)">3</div><div class="lbl">年度数据(2023-2025)</div></div>
+    <div class="stat-card"><div class="num" style="color:#722ed1">8</div><div class="lbl">子表/嵌套结构</div></div>
+    <div class="stat-card"><div class="num" style="color:var(--warning)">150+</div><div class="lbl">参考字段总量</div></div>
+  </div>
+
+  <!-- Module Tabs -->
+  <div class="module-tabs" id="moduleTabs">
+    <button class="module-tab active" data-module="basic">📋 基本信息 <span class="badge">29</span></button>
+    <button class="module-tab" data-module="listing">📈 上市情况 <span class="badge">4</span></button>
+    <button class="module-tab" data-module="economy">💰 经济效益 <span class="badge">66</span></button>
+    <button class="module-tab" data-module="finance">🏦 融资情况 <span class="badge">6</span></button>
+    <button class="module-tab" data-module="specialized">🎯 专业化 <span class="badge">9</span></button>
+    <button class="module-tab" data-module="refined">🔬 精细化 <span class="badge">6</span></button>
+    <button class="module-tab" data-module="featured">⭐ 特色化 <span class="badge">12</span></button>
+    <button class="module-tab" data-module="innovation">💡 创新能力 <span class="badge">14</span></button>
+    <button class="module-tab" data-module="awards">🏆 科技奖励 <span class="badge">3</span></button>
+    <button class="module-tab" data-module="chain">🔗 产业链 <span class="badge">9</span></button>
+    <button class="module-tab" data-module="product">📦 主导产品 <span class="badge">4</span></button>
+    <button class="module-tab" data-module="other">📝 其他 <span class="badge">7</span></button>
+  </div>
+
+  <!-- Form Content -->
+  <div class="form-wrap">
+
+    <!-- =============================== 1. 企业基本信息 =============================== -->
+    <div class="module-pane active" id="pane-basic">
+      <div class="section-title">🏢 企业基本信息 <span class="count">(29 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>企业名称 <span class="badge badge-blue">必填</span></label><input value="广州测试科技有限公司" placeholder="企业名称"></div>
+        <div class="form-group"><label>统一社会信用代码</label><input value="91440101MA5XXXXXXX" placeholder="18位信用代码"></div>
+        <div class="form-group"><label>法定代表人</label><input value="张三"></div>
+        <div class="form-group"><label>注册资本（万元）</label><input type="number" value="5000"></div>
+        <div class="form-group"><label>注册时间</label><input type="date" value="2015-06-15"></div>
+        <div class="form-group"><label>企业规模</label><select><option>大型</option><option selected>中型</option><option>小型</option><option>微型</option></select></div>
+        <div class="form-group"><label>企业类型</label><select><option>国有企业</option><option>民营企业</option><option selected>有限责任公司</option><option>股份有限公司</option><option>外资企业</option><option>其他</option></select></div>
+        <div class="form-group"><label>所属行业代码</label><input value="I6513"></div>
+        <div class="form-group"><label>所属行业名称</label><input value="软件和信息技术服务业"></div>
+        <div class="form-group"><label>细分领域代码</label><input value="I6513-01"></div>
+        <div class="form-group"><label>细分领域名称</label><input value="应用软件开发"></div>
+        <div class="form-group"><label>企业注册地-省</label><input value="广东省"></div>
+        <div class="form-group"><label>企业注册地-市（区）</label><input value="广州市"></div>
+        <div class="form-group"><label>企业注册地-县</label><input value="海珠区"></div>
+        <div class="form-group"><label>通讯地址</label><input value="广州市海珠区新港中路123号"></div>
+        <div class="form-group"><label>邮编</label><input value="510310"></div>
+        <div class="form-group"><label>控股股东</label><input value="广州测试控股集团"></div>
+        <div class="form-group"><label>实际控制人</label><input value="李四"></div>
+        <div class="form-group"><label>实际控制人国籍</label><input value="中国"></div>
+        <div class="form-group"><label>联系人</label><input value="王五"></div>
+        <div class="form-group"><label>联系电话</label><input value="020-88886666"></div>
+        <div class="form-group"><label>联系手机</label><input value="13800138000"></div>
+        <div class="form-group"><label>传真</label><input value="020-88886667"></div>
+        <div class="form-group"><label>邮箱</label><input type="email" value="contact@test-tech.com"></div>
+        <div class="form-group full" style="grid-column:span 2;">
+          <label>是否存在小巨人控股关系</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="hasLittleGiant" checked> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="hasLittleGiant"> 是</label>
+          </div>
+        </div>
+        <div class="form-group"><label>关联小巨人企业名称</label><input placeholder="如无关联请留空"></div>
+        <div class="form-group full" style="grid-column:span 2;">
+          <label>是否存在同集团相似产品企业</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="hasGroupSimilar" checked> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="hasGroupSimilar"> 是</label>
+          </div>
+        </div>
+        <div class="form-group"><label>同集团企业名称</label><input placeholder="如无请留空"></div>
+      </div>
     </div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <button class="tab-btn active" data-tab="declarations">📄 申报项目管理</button>
-        <button class="tab-btn" data-tab="materials">📎 申报材料管理</button>
-        <button class="tab-btn" data-tab="new">➕ 新建申报</button>
+    <!-- =============================== 2. 上市情况 =============================== -->
+    <div class="module-pane" id="pane-listing">
+      <div class="section-title">📈 上市情况 <span class="count">(4 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>上市状态</label><select><option>未上市</option><option selected>已上市</option><option>拟上市</option><option>新三板挂牌</option></select></div>
+        <div class="form-group"><label>股票代码</label><input value="688XXX.SH"></div>
+        <div class="form-group"><label>上市进程</label><select><option>已上市</option><option selected>辅导备案</option><option>IPO审核中</option><option>已过会</option></select></div>
+        <div class="form-group"><label>拟上市地点</label><select><option selected>不适用</option><option>上交所主板</option><option>深交所主板</option><option>科创板</option><option>创业板</option><option>北交所</option><option>港交所</option><option>纳斯达克</option></select></div>
+      </div>
     </div>
 
-    <!-- ==================== Tab: 申报列表 ==================== -->
-    <div id="tab-declarations" class="tab-content">
-        <div class="card">
-            <div class="flex-between mb-2">
-                <div class="card-title" style="border:none;margin:0;padding:0;">申报项目列表</div>
-                <div class="flex gap-2">
-                    <select id="filterStatus" onchange="loadDeclarations()">
-                        <option value="">全部状态</option>
-                        <option value="DRAFT">草稿</option>
-                        <option value="PENDING">审核中</option>
-                        <option value="APPROVED">已通过</option>
-                        <option value="REJECTED">已驳回</option>
-                    </select>
-                    <select id="filterType" onchange="loadDeclarations()">
-                        <option value="">全部类型</option>
-                        <option value="XIAOJUREN">小巨人</option>
-                        <option value="PROVINCIAL">专精特新</option>
-                        <option value="INNOVATIVE">创新型</option>
-                    </select>
-                    <button class="btn btn-primary btn-sm" onclick="document.querySelector('[data-tab=new]').click()">+ 新建申报</button>
-                </div>
+    <!-- =============================== 3. 经济效益 =============================== -->
+    <div class="module-pane" id="pane-economy">
+      <div class="section-title">👥 人员指标 <span class="count">(6 个字段，2023-2025)</span></div>
+      <table class="sub-table">
+        <thead><tr><th>指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead>
+        <tbody>
+          <tr><td>全职员工数量</td><td><input type="number" value="98"></td><td><input type="number" value="120"></td><td><input type="number" value="145"></td></tr>
+          <tr><td>研发人员数量</td><td><input type="number" value="32"></td><td><input type="number" value="41"></td><td><input type="number" value="52"></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">💰 财务指标 <span class="count">(48 个字段，2023-2025)</span></div>
+      <table class="sub-table">
+        <thead><tr><th>指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead>
+        <tbody>
+          <tr><td>营业收入（万元）</td><td><input type="number" value="3800"></td><td><input type="number" value="5000"></td><td><input type="number" value="6800"></td></tr>
+          <tr><td>主营业务收入（万元）</td><td><input type="number" value="3600"></td><td><input type="number" value="4800"></td><td><input type="number" value="6500"></td></tr>
+          <tr><td>主营业务收入增长率（%）</td><td><input type="number" step="0.1" value="15.2"></td><td><input type="number" step="0.1" value="18.5"></td><td><input type="number" step="0.1" value="16.8"></td></tr>
+          <tr><td>利润总额（万元）</td><td><input type="number" value="520"></td><td><input type="number" value="720"></td><td><input type="number" value="980"></td></tr>
+          <tr><td>净利润（万元）</td><td><input type="number" value="440"></td><td><input type="number" value="610"></td><td><input type="number" value="830"></td></tr>
+          <tr><td>净利润增长率（%）</td><td><input type="number" step="0.1" value="12.5"></td><td><input type="number" step="0.1" value="16.2"></td><td><input type="number" step="0.1" value="18.1"></td></tr>
+          <tr><td>销售费用（万元）</td><td><input type="number" value="180"></td><td><input type="number" value="220"></td><td><input type="number" value="260"></td></tr>
+          <tr><td>管理费用（万元）</td><td><input type="number" value="320"></td><td><input type="number" value="380"></td><td><input type="number" value="450"></td></tr>
+          <tr><td>营业成本（万元）</td><td><input type="number" value="2200"></td><td><input type="number" value="2900"></td><td><input type="number" value="3800"></td></tr>
+          <tr><td>主营业务成本（万元）</td><td><input type="number" value="2100"></td><td><input type="number" value="2750"></td><td><input type="number" value="3600"></td></tr>
+          <tr><td>产品销售成本（万元）</td><td><input type="number" value="2000"></td><td><input type="number" value="2650"></td><td><input type="number" value="3500"></td></tr>
+          <tr><td>资产总额（万元）</td><td><input type="number" value="6200"></td><td><input type="number" value="8000"></td><td><input type="number" value="10500"></td></tr>
+          <tr><td>期末净资产（万元）</td><td><input type="number" value="4200"></td><td><input type="number" value="5200"></td><td><input type="number" value="6800"></td></tr>
+          <tr><td>负债总额（万元）</td><td><input type="number" value="2000"></td><td><input type="number" value="2800"></td><td><input type="number" value="3700"></td></tr>
+          <tr><td>资产负债率（%）</td><td><input type="number" step="0.1" value="32.3"></td><td><input type="number" step="0.1" value="35.0"></td><td><input type="number" step="0.1" value="35.2"></td></tr>
+          <tr><td>上缴税金（万元）</td><td><input type="number" value="280"></td><td><input type="number" value="360"></td><td><input type="number" value="480"></td></tr>
+        </tbody>
+      </table>
+
+      <div class="section-title">💳 融资与估值 <span class="count">(12 个字段，2023-2025)</span></div>
+      <table class="sub-table">
+        <thead><tr><th>指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead>
+        <tbody>
+          <tr><td>股权融资总额（万元）</td><td><input type="number" value="2000"></td><td><input type="number" value="0"></td><td><input type="number" value="5000"></td></tr>
+          <tr><td>对应估值（万元）</td><td><input type="number" value="30000"></td><td><input type="number" value="0"></td><td><input type="number" value="80000"></td></tr>
+          <tr><td>银行贷款（万元）</td><td><input type="number" value="1000"></td><td><input type="number" value="1500"></td><td><input type="number" value="2000"></td></tr>
+          <tr><td>境内债券（万元）</td><td><input type="number" value="0"></td><td><input type="number" value="0"></td><td><input type="number" value="0"></td></tr>
+          <tr><td>境外债券（万元）</td><td><input type="number" value="0"></td><td><input type="number" value="0"></td><td><input type="number" value="0"></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- =============================== 4. 融资情况 =============================== -->
+    <div class="module-pane" id="pane-finance">
+      <div class="section-title">🏦 融资情况 <span class="count">(6 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>审计报告编码</label><input value="穗华财审字[2026]第0088号"></div>
+        <div class="form-group">
+          <label>是否申请银行贷款</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="appliedBankLoan"> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="appliedBankLoan" checked> 是</label>
+          </div>
+        </div>
+        <div class="form-group"><label>信贷满足率（%）</label><input type="number" step="0.1" value="85.0"></div>
+        <div class="form-group full"><label>贷款用途</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 研发投入</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 产能扩张</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 补充流动资金</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 技术改造</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 海外拓展</label>
+          </div>
+        </div>
+        <div class="form-group"><label>资金需求额（万元）</label><input type="number" value="3000"></div>
+        <div class="form-group full"><label>融资方式</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 银行贷款</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 股权融资</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 债券融资</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 融资租赁</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 政府补贴</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================== 5. 专业化 =============================== -->
+    <div class="module-pane" id="pane-specialized">
+      <div class="section-title">🎯 专业化指标 <span class="count">(3 个字段 + 产品子表)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>从事细分市场时间（年）</label><input type="number" value="8"></div>
+        <div class="form-group"><label>主营业务收入占比（%）</label><input type="number" step="0.1" value="95.6"></div>
+        <div class="form-group"><label>近2年主营业务平均增长率（%）</label><input type="number" step="0.1" value="17.6"></div>
+      </div>
+      <div class="section-title" style="margin-top:20px;">📦 产品表 <span class="count">(6 个字段/产品，可添加多行)</span></div>
+      <div style="overflow-x:auto;">
+        <table class="sub-table" id="productTable">
+          <thead><tr><th>产品名称</th><th>产品收入（万元）</th><th>日产能</th><th>产能单位</th><th>知识产权名称</th><th>知识产权附件</th><th>操作</th></tr></thead>
+          <tbody id="productTableBody">
+            <tr>
+              <td><input value="智能测试平台 V3.0"></td>
+              <td><input type="number" value="3200"></td>
+              <td><input type="number" value="500"></td>
+              <td><select><option selected>套/日</option><option>件/日</option><option>吨/日</option><option>台/日</option></select></td>
+              <td><input value="智能测试方法及系统（发明专利）"></td>
+              <td><button class="btn btn-outline btn-sm" onclick="alert('模拟上传')">📎 上传</button></td>
+              <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">删除</button></td>
+            </tr>
+            <tr>
+              <td><input value="数据中台管理系统"></td>
+              <td><input type="number" value="1800"></td>
+              <td><input type="number" value="200"></td>
+              <td><select><option selected>套/日</option><option>件/日</option></select></td>
+              <td><input value="数据中台管理软件（软著）"></td>
+              <td><button class="btn btn-outline btn-sm" onclick="alert('模拟上传')">📎 上传</button></td>
+              <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">删除</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="btn btn-outline btn-sm mt-2" onclick="addProductRow()">＋ 添加产品</button>
+    </div>
+
+    <!-- =============================== 6. 精细化 =============================== -->
+    <div class="module-pane" id="pane-refined">
+      <div class="section-title">🔬 精细化指标 <span class="count">(6 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>管理体系认证</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> ISO9001 质量管理体系</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> ISO14001 环境管理体系</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> ISO45001 职业健康安全</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> ISO27001 信息安全管理</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> IATF16949 汽车行业</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> GMP 药品生产质量</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>信息系统支撑</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> ERP 企业资源计划</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> MES 生产执行系统</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> PLM 产品生命周期</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> CRM 客户关系管理</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> SCM 供应链管理</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> WMS 仓储管理</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>国际认证</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> CE 欧盟认证</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> FCC 美国认证</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> UL 美国保险商实验室</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> RoHS 环保指令</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>国内认证</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> CCC 中国强制认证</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> CQC 中国质量认证</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 节能产品认证</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>业务系统云迁移</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="cloudMigration"> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="cloudMigration" checked> 是</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>制造业互联网示范项目</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="internetDemo" checked> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="internetDemo"> 是</label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================== 7. 特色化 =============================== -->
+    <div class="module-pane" id="pane-featured">
+      <div class="section-title">⭐ 特色化指标 <span class="count">(12 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>2024 国际市场占有率（%）</label><input type="number" step="0.01" value="2.35"></div>
+        <div class="form-group"><label>2025 国际市场占有率（%）</label><input type="number" step="0.01" value="2.85"></div>
+        <div class="form-group"><label>2024 国内市场占有率（%）</label><input type="number" step="0.01" value="5.20"></div>
+        <div class="form-group"><label>2025 国内市场占有率（%）</label><input type="number" step="0.01" value="6.10"></div>
+        <div class="form-group full"><label>市场占有率说明</label><textarea rows="3">公司在华南地区智能测试细分市场占有率约6.1%，位居行业前三。主要竞争对手为XX科技和YY信息，公司产品在政府、金融领域有较强竞争优势。</textarea></div>
+        <div class="form-group"><label>2024 出口额（万元）</label><input type="number" value="560"></div>
+        <div class="form-group"><label>2025 出口额（万元）</label><input type="number" value="820"></div>
+        <div class="form-group full"><label>出口目的地</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 东南亚</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 中东</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 欧洲</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 北美</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 非洲</label>
+          </div>
+        </div>
+        <div class="form-group"><label>2024 品牌数量</label><input type="number" value="2"></div>
+        <div class="form-group"><label>2025 品牌数量</label><input type="number" value="3"></div>
+        <div class="form-group"><label>2024 品牌销售收入（万元）</label><input type="number" value="1800"></div>
+        <div class="form-group"><label>2025 品牌销售收入（万元）</label><input type="number" value="2800"></div>
+      </div>
+    </div>
+
+    <!-- =============================== 8. 创新能力 =============================== -->
+    <div class="module-pane" id="pane-innovation">
+      <div class="section-title">💡 创新能力指标 <span class="count">(14 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>研发机构建设情况</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 省级企业技术中心</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 市级工程技术研究中心</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 国家级实验室</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 重点实验室</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>院士工作站</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="academicianStation" checked> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="academicianStation"> 是</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>博士后工作站</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="postdoctoralStation" checked> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="postdoctoralStation"> 是</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>合作机构</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 华南理工大学</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 中山大学</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox" checked> 广东省科学院</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;"><input type="checkbox"> 中国信通院</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>成果应用情况</label><textarea rows="3">公司累计获得发明专利15项，软件著作权32项。核心产品"智能测试平台"已在广东省政务云、中国银行广东省分行等客户落地应用，累计创造营收超8000万元。</textarea></div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px;">🔬 研发投入（2023-2025）</div>
+      <table class="sub-table">
+        <thead><tr><th>指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead>
+        <tbody>
+          <tr><td>研发费用（万元）</td><td><input type="number" value="280"></td><td><input type="number" value="400"></td><td><input type="number" value="580"></td></tr>
+          <tr><td>研发费用占比（%）</td><td><input type="number" step="0.1" value="7.4"></td><td><input type="number" step="0.1" value="8.0"></td><td><input type="number" step="0.1" value="8.5"></td></tr>
+          <tr><td>研发人员占比（%）</td><td><input type="number" step="0.1" value="32.7"></td><td><input type="number" step="0.1" value="34.2"></td><td><input type="number" step="0.1" value="35.9"></td></tr>
+        </tbody>
+      </table>
+
+      <div class="form-grid" style="margin-top:16px;">
+        <div class="form-group"><label>Ⅰ类知识产权总数</label><input type="number" value="15"></div>
+        <div class="form-group"><label>发明专利数</label><input type="number" value="8"></div>
+      </div>
+    </div>
+
+    <!-- =============================== 9. 科技奖励 =============================== -->
+    <div class="module-pane" id="pane-awards">
+      <div class="section-title">🏆 科技奖励 <span class="count">(3 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>国家级科技奖励</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;margin-bottom:6px;"><input value="国家科技进步二等奖" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2023" style="width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+            <div style="display:flex;gap:8px;"><input value="国家知识产权优势企业" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2024" style="width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+          </div>
+        </div>
+        <div class="form-group full"><label>省级科技奖励</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;margin-bottom:6px;"><input value="广东省科技进步一等奖" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2024" style="width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+            <div style="display:flex;gap:8px;"><input value="广东省专精特新企业" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2022" style="width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+          </div>
+        </div>
+        <div class="form-group full"><label>创客中国50强</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;"><input value="创客中国广东省赛区二等奖" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2024" style="width:100px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================== 10. 产业链配套 =============================== -->
+    <div class="module-pane" id="pane-chain">
+      <div class="section-title">🔗 产业链配套 <span class="count">(9 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>所属产业链</label><input value="软件与信息服务产业链"></div>
+        <div class="form-group">
+          <label>是否补短板填空白</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="fillGap"> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="fillGap" checked> 是</label>
+          </div>
+        </div>
+        <div class="form-group"><label>补短板产品</label><input value="国产替代智能测试平台"></div>
+        <div class="form-group"><label>填补空白领域</label><input value="政务领域国产化智能测试工具"></div>
+        <div class="form-group"><label>替代进口产品</label><input value="替代 HP LoadRunner / IBM Rational"></div>
+        <div class="form-group full"><label>补短板说明</label><textarea rows="3">公司自主研发的智能测试平台实现了对进口测试工具（如HP LoadRunner、IBM Rational）的国产化替代，在政务、金融领域已累计部署超过200套，填补了国内在大型分布式系统性能测试领域的空白。</textarea></div>
+        <div class="form-group">
+          <label>是否直接配套知名企业</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="directSupply"> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="directSupply" checked> 是</label>
+          </div>
+        </div>
+        <div class="form-group full"><label>配套企业列表</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <span class="badge badge-blue" style="font-size:13px;padding:4px 10px;">华为技术</span>
+            <span class="badge badge-blue" style="font-size:13px;padding:4px 10px;">中国银行</span>
+            <span class="badge badge-blue" style="font-size:13px;padding:4px 10px;">南方电网</span>
+            <span class="badge badge-blue" style="font-size:13px;padding:4px 10px;">广东省政府</span>
+          </div>
+        </div>
+        <div class="form-group full"><label>行业领军企业列表</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <span class="badge badge-orange" style="font-size:13px;padding:4px 10px;">中国电子科技集团</span>
+            <span class="badge badge-orange" style="font-size:13px;padding:4px 10px;">中软国际</span>
+            <span class="badge badge-orange" style="font-size:13px;padding:4px 10px;">东软集团</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =============================== 11. 主导产品所属领域 =============================== -->
+    <div class="module-pane" id="pane-product">
+      <div class="section-title">📦 主导产品所属领域 <span class="count">(4 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group"><label>主导产品名称</label><input value="智能测试平台 V3.0"></div>
+        <div class="form-group"><label>主导产品类别</label><select><option selected>软件产品</option><option>硬件产品</option><option>服务</option><option>系统集成</option></select></div>
+        <div class="form-group">
+          <label>是否属于工业六基</label>
+          <div style="display:flex;gap:16px;padding:6px 0;">
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="sixBasics"> 否</label>
+            <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input type="radio" name="sixBasics" checked> 是</label>
+          </div>
+        </div>
+        <div class="form-group"><label>六基分类</label><select><option>核心基础零部件</option><option>关键基础材料</option><option selected>先进基础工艺</option><option>基础软件</option><option>产业技术基础</option><option>基础元器件</option></select></div>
+      </div>
+    </div>
+
+    <!-- =============================== 12. 其他 =============================== -->
+    <div class="module-pane" id="pane-other">
+      <div class="section-title">📝 其他信息 <span class="count">(7 个字段)</span></div>
+      <div class="form-grid">
+        <div class="form-group full"><label>标准制定情况</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;margin-bottom:6px;">
+              <input value="GB/T 38634-2020 软件测试标准" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;">
+              <select style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><option selected>参与制定</option><option>主持制定</option></select>
             </div>
-            <div class="table-wrap">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>申报编号</th>
-                            <th>企业名称</th>
-                            <th>类型</th>
-                            <th>级别</th>
-                            <th>年份</th>
-                            <th>状态</th>
-                            <th>评分</th>
-                            <th>提交时间</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody id="declTableBody">
-                        <tr><td colspan="9" class="text-center text-secondary">加载中...</td></tr>
-                    </tbody>
-                </table>
+            <div style="display:flex;gap:8px;">
+              <input value="团体标准：智能测试平台技术规范" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;">
+              <select style="padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><option>参与制定</option><option selected>主持制定</option></select>
             </div>
+          </div>
         </div>
+        <div class="form-group full"><label>企业荣誉资质</label>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 0;">
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">国家级高新技术企业</span>
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">省级专精特新</span>
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">广东省创新型企业</span>
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">ISO9001认证</span>
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">CMMI L3</span>
+            <span class="badge badge-green" style="font-size:13px;padding:4px 10px;">AAA信用等级</span>
+          </div>
+        </div>
+        <div class="form-group full"><label>境外经营情况</label><textarea rows="3">公司在东南亚（新加坡、马来西亚）设有办事处，2025年境外收入约820万元，占总体营收约12%。主要客户为当地金融机构和政府机构。</textarea></div>
+        <div class="form-group full"><label>国家重大科技项目</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;margin-bottom:6px;"><input value="国家科技重大专项：新一代智能测试技术研究" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2024-2027" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+            <div style="display:flex;gap:8px;"><input value="国家重点研发计划：面向政务云的质量保障平台" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2023-2025" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+          </div>
+        </div>
+        <div class="form-group full"><label>国家技术创新项目</label>
+          <div style="padding:6px 0;">
+            <div style="display:flex;gap:8px;"><input value="产业基础再造和制造业高质量发展专项" style="flex:1;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"><input value="2025" style="width:120px;padding:6px 10px;border:1px solid var(--border);border-radius:4px;"></div>
+          </div>
+        </div>
+        <div class="form-group full"><label>企业总体情况介绍</label><textarea rows="4">广州测试科技有限公司成立于2015年，注册资本5000万元，是专注于软件测试领域的高新技术企业。公司现有员工145人，其中研发人员52人，占比35.9%。2025年实现营业收入6800万元，净利润830万元。公司拥有发明专利8项，软件著作权32项，参与制定国家标准1项。核心产品"智能测试平台"已累计服务超过300家客户，在政务、金融领域市场占有率位居华南前三。</textarea></div>
+      </div>
     </div>
 
-    <!-- ==================== Tab: 材料管理 ==================== -->
-    <div id="tab-materials" class="tab-content" style="display:none;">
-        <div class="card">
-            <div class="flex-between mb-2">
-                <div class="card-title" style="border:none;margin:0;padding:0;">申报材料</div>
-                <div>
-                    <select id="materialDeclSelect" onchange="loadMaterials()">
-                        <option value="">-- 请选择申报项目 --</option>
-                    </select>
-                </div>
-            </div>
-            <div id="materialList"></div>
-        </div>
+    <!-- Action Buttons -->
+    <div class="btn-group">
+      <button class="btn btn-outline" onclick="resetAll()">🔄 重置</button>
+      <button class="btn btn-primary" onclick="saveDraft()">💾 保存草稿</button>
+      <button class="btn btn-success" onclick="submitForm()">📨 提交申报</button>
     </div>
-
-    <!-- ==================== Tab: 新建/编辑申报 ==================== -->
-    <div id="tab-new" class="tab-content" style="display:none;">
-        <div class="card">
-            <div class="card-title" id="formTitle">新建申报项目</div>
-            <form id="declForm" onsubmit="return false;">
-
-                <!-- 基本信息 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">📌 基本信息</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>企业名称</label>
-                        <input name="enterpriseName" value="广州测试科技有限公司" required>
-                    </div>
-                    <div class="form-group">
-                        <label>申报类型</label>
-                        <select name="type" required>
-                            <option value="XIAOJUREN">国家级小巨人</option>
-                            <option value="PROVINCIAL">省级专精特新</option>
-                            <option value="INNOVATIVE">创新型中小企业</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>申报类别</label>
-                        <select name="category">
-                            <option value="认定">认定</option>
-                            <option value="复核">复核</option>
-                            <option value="重新申报">重新申报</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>年份</label>
-                        <input name="year" type="number" value="2026">
-                    </div>
-                </div>
-
-                <!-- 财务指标 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">💰 财务指标</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>营业收入（万元）</label>
-                        <input name="revenue" type="number" placeholder="≥1000万元">
-                    </div>
-                    <div class="form-group">
-                        <label>研发投入（万元）</label>
-                        <input name="rdInvestment" type="number" placeholder="≥100万元">
-                    </div>
-                    <div class="form-group">
-                        <label>研发投入占比（%）</label>
-                        <input name="rdRatio" type="number" step="0.1" placeholder="≥3%">
-                    </div>
-                    <div class="form-group">
-                        <label>资产负债率（%）</label>
-                        <input name="debtRatio" type="number" step="0.1" placeholder="建议≤70%">
-                    </div>
-                    <div class="form-group">
-                        <label>净利润（万元）</label>
-                        <input name="netProfit" type="number" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>主营业务收入（万元）</label>
-                        <input name="mainRevenue" type="number" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>近2年营收平均增长率（%）</label>
-                        <input name="revenueGrowth2yAvg" type="number" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>净利润率（%）</label>
-                        <input name="netProfitRate" type="number" step="0.1">
-                    </div>
-                </div>
-
-                <!-- 专业化指标 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">🏢 专业化指标</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>从事特定细分市场年限（年）</label>
-                        <input name="marketYears" type="number" placeholder="≥2年">
-                    </div>
-                    <div class="form-group">
-                        <label>主营业务收入占比（%）</label>
-                        <input name="mainRevenueRatio" type="number" step="0.1">
-                    </div>
-                    <div class="form-group full">
-                        <label>主导产品所属领域</label>
-                        <select name="leadProductDomain">
-                            <option value="">请选择</option>
-                            <option value="补短板">补短板</option>
-                            <option value="锻长板">锻长板</option>
-                            <option value="填空白">填空白</option>
-                            <option value="六基">六基领域</option>
-                            <option value="中华老字号">中华老字号</option>
-                            <option value="产业链龙头">产业链龙头</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>主导产品名称</label>
-                        <input name="productName" placeholder="如：智能测试平台">
-                    </div>
-                    <div class="form-group">
-                        <label>主导产品市场占有率（%）</label>
-                        <input name="productMarketShare" type="number" step="0.01">
-                    </div>
-                </div>
-
-                <!-- 精细化指标 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">🔬 精细化指标</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>数字化水平等级</label>
-                        <select name="digitalLevel">
-                            <option value="0">未评级</option>
-                            <option value="1">一级</option>
-                            <option value="2">二级</option>
-                            <option value="3">三级</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>市场占有率（%）</label>
-                        <input name="marketShare" type="number" step="0.01">
-                    </div>
-                </div>
-
-                <!-- 质量管理 -->
-                <div style="display:flex;flex-wrap:wrap;gap:16px;margin:8px 0;">
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityAwardProvincial" type="checkbox"> 省级以上质量奖</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityIso" type="checkbox"> ISO9001认证</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityBrand" type="checkbox"> 自有品牌</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="qualityStandard" type="checkbox"> 参与标准制定</label>
-                </div>
-
-                <!-- 创新能力 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">💡 创新能力指标</h4>
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label>发明专利数</label>
-                        <input name="patentCount" type="number" placeholder="≥2件">
-                    </div>
-                    <div class="form-group">
-                        <label>Ⅰ类高价值知识产权</label>
-                        <input name="ipHighValue" type="number">
-                    </div>
-                    <div class="form-group">
-                        <label>自主研发Ⅰ类知识产权</label>
-                        <input name="ipClass1Self" type="number">
-                    </div>
-                    <div class="form-group">
-                        <label>Ⅰ类知识产权</label>
-                        <input name="ipClass1" type="number">
-                    </div>
-                    <div class="form-group">
-                        <label>Ⅱ类知识产权</label>
-                        <input name="ipClass2" type="number">
-                    </div>
-                    <div class="form-group">
-                        <label>研发人员占比（%）</label>
-                        <input name="rdStaffRatio" type="number" step="0.1">
-                    </div>
-                    <div class="form-group">
-                        <label>研发机构级别</label>
-                        <select name="rdInstitutionLevel">
-                            <option value="">请选择</option>
-                            <option value="国家级">国家级</option>
-                            <option value="省级">省级</option>
-                            <option value="市级">市级</option>
-                            <option value="其他">其他</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>近2年股权融资（万元）</label>
-                        <input name="equityFinancing2y" type="number" step="0.1">
-                    </div>
-                </div>
-
-                <!-- 特色化指标 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">⭐ 特色化指标（广东）</h4>
-                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:8px 0;">
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureKeyIndustry" type="checkbox"> 重点领域</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureSpecialTech" type="checkbox"> 特色工艺技术</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureFirstSet" type="checkbox"> 首台套</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureGreenMfg" type="checkbox"> 绿色制造</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureChuangke" type="checkbox"> 创客广东</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="featureDesignAward" type="checkbox"> 省长杯设计奖</label>
-                </div>
-                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 12px;">
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentNational" type="checkbox"> 国家级人才</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentProvincial" type="checkbox"> 省级人才</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="talentCity" type="checkbox"> 市级人才</label>
-                </div>
-
-                <!-- 直通条件 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">🏆 直通条件</h4>
-                <div style="display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 12px;">
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directTechAward" type="checkbox"> 省级科技奖</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directNationalAward" type="checkbox"> 国家级科技奖</label>
-                    <label style="display:flex;align-items:center;gap:4px;font-size:14px;"><input name="directChuangke" type="checkbox"> 创客中国500强</label>
-                </div>
-
-                <!-- 补充说明 -->
-                <h4 style="margin:16px 0 8px;color:var(--primary);">📝 补充说明</h4>
-                <div class="form-grid">
-                    <div class="form-group full">
-                        <label>产业链配套说明</label>
-                        <textarea name="chainDescription" rows="3" placeholder="请描述企业在产业链中的位置、配套情况..."></textarea>
-                    </div>
-                </div>
-
-                <!-- Hidden -->
-                <input name="enterpriseId" type="hidden" value="1">
-                <input name="id" type="hidden" value="">
-
-                <!-- 操作按钮 -->
-                <div class="modal-actions" style="border-top:1px solid var(--border);padding-top:16px;margin-top:20px;">
-                    <button type="button" class="btn btn-outline" onclick="resetForm()">重置</button>
-                    <button type="button" class="btn btn-primary" onclick="saveDeclaration()">💾 保存草稿</button>
-                    <button type="button" class="btn btn-success" onclick="saveAndSubmit()">📨 保存并提交</button>
-                </div>
-            </form>
-        </div>
-
-        <!-- AI评估结果 -->
-        <div id="aiResultBox" style="display:none;"></div>
-    </div>
-</div>
-
-<!-- ==================== Detail Modal ==================== -->
-<div class="modal-overlay" id="detailModal">
-    <div class="modal">
-        <div class="flex-between mb-2">
-            <h2 style="margin:0;">📋 申报详情</h2>
-            <button class="btn btn-outline btn-sm" onclick="closeDetail()">✕ 关闭</button>
-        </div>
-        <div id="detailContent"></div>
-    </div>
-</div>
+  </div><!-- /form-wrap -->
+</div><!-- /container -->
 
 <script>
-const API = '/api';
-
-// ==================== Data Loading ====================
-
-async function loadStats() {
-    try {
-        const res = await fetch(API + '/dashboard/stats');
-        const data = await res.json();
-        document.getElementById('statTotal').textContent = data.total || 0;
-        document.getElementById('statDraft').textContent = data.draft || 0;
-        document.getElementById('statPending').textContent = data.pending || 0;
-        document.getElementById('statApproved').textContent = data.approved || 0;
-        document.getElementById('statRejected').textContent = data.rejected || 0;
-    } catch(e) { console.error('loadStats error:', e); }
-}
-
-async function loadDeclarations() {
-    const status = document.getElementById('filterStatus').value;
-    const type = document.getElementById('filterType').value;
-    try {
-        const res = await fetch(API + `/declarations?keyword=&status=${status}&type=${type}&page=0&size=100`);
-        const data = await res.json();
-        renderDeclTable(data.content || []);
-    } catch(e) {
-        document.getElementById('declTableBody').innerHTML = '<tr><td colspan="9" class="text-center text-secondary">加载失败</td></tr>';
-    }
-}
-
-function renderDeclTable(list) {
-    const tbody = document.getElementById('declTableBody');
-    if (!list.length) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-secondary">暂无申报项目</td></tr>';
-        return;
-    }
-    tbody.innerHTML = list.map(d => {
-        const statusClass = {DRAFT:'badge-draft', PENDING:'badge-pending', SUBMITTED:'badge-pending', APPROVED:'badge-approved', REJECTED:'badge-rejected'}[d.status] || 'badge-draft';
-        const statusText = {DRAFT:'草稿', PENDING:'审核中', SUBMITTED:'待审核', APPROVED:'已通过', REJECTED:'已驳回'}[d.status] || d.status;
-        const typeText = {XIAOJUREN:'小巨人', PROVINCIAL:'专精特新', INNOVATIVE:'创新型'}[d.type] || d.type;
-        return `<tr>
-            <td>${d.declarationCode || '-'}</td>
-            <td>${d.enterpriseName || '-'}</td>
-            <td>${typeText}</td>
-            <td>${d.level || '-'}</td>
-            <td>${d.year || '-'}</td>
-            <td><span class="badge ${statusClass}">${statusText}</span></td>
-            <td>${d.totalScore != null ? d.totalScore + '分' : '-'}</td>
-            <td>${d.submitTime ? new Date(d.submitTime).toLocaleDateString() : '-'}</td>
-            <td class="btn-group">
-                <button class="btn btn-outline btn-sm" onclick="viewDetail(${d.id})">查看</button>
-                ${d.status === 'DRAFT' ? `<button class="btn btn-primary btn-sm" onclick="editDecl(${d.id})">编辑</button>` : ''}
-                ${d.status === 'DRAFT' ? `<button class="btn btn-success btn-sm" onclick="submitDecl(${d.id})">提交</button>` : ''}
-                ${d.status !== 'APPROVED' ? `<button class="btn btn-outline btn-sm" onclick="aiEval(${d.id})">AI评估</button>` : ''}
-                ${d.status === 'DRAFT' ? `<button class="btn btn-danger btn-sm" onclick="deleteDecl(${d.id})">删除</button>` : ''}
-            </td>
-        </tr>`;
-    }).join('');
-}
-
-// ==================== Tab Switching ====================
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-        const tab = this.dataset.tab;
-        document.getElementById('tab-' + tab).style.display = 'block';
-        if (tab === 'declarations') { loadDeclarations(); loadStats(); }
-        if (tab === 'materials') { loadDeclSelect(); loadMaterials(); }
-        if (tab === 'new') { resetForm(); }
-    });
+// ==================== Module Tab Switching ====================
+document.querySelectorAll('.module-tab').forEach(btn => {
+  btn.addEventListener('click', function() {
+    document.querySelectorAll('.module-tab').forEach(b => b.classList.remove('active'));
+    this.classList.add('active');
+    document.querySelectorAll('.module-pane').forEach(p => p.classList.remove('active'));
+    document.getElementById('pane-' + this.dataset.module).classList.add('active');
+  });
 });
 
-// ==================== CRUD Operations ====================
-
-function getFormData() {
-    const form = document.getElementById('declForm');
-    const data = {};
-    new FormData(form).forEach((v, k) => { data[k] = v; });
-    // Checkboxes: send boolean
-    ['qualityAwardProvincial','qualityIso','qualityBrand','qualityStandard',
-     'featureKeyIndustry','featureSpecialTech','featureFirstSet','featureGreenMfg',
-     'featureChuangke','featureDesignAward','talentNational','talentProvincial','talentCity',
-     'talentRecommend','directTechAward','directNationalAward','directChuangke'].forEach(f => {
-        data[f] = document.querySelector(`[name="${f}"]`).checked;
+// ==================== Dynamic Field Count ====================
+function countFields() {
+  let total = 0;
+  document.querySelectorAll('.module-pane').forEach(pane => {
+    const inputs = pane.querySelectorAll('input:not([type=radio]):not([type=checkbox]), select, textarea');
+    const radios = pane.querySelectorAll('input[type=radio]');
+    const checkboxes = pane.querySelectorAll('input[type=checkbox]');
+    // Count radio groups as 1 field each
+    const radioGroups = new Set();
+    radios.forEach(r => radioGroups.add(r.name));
+    // Count checkbox groups as 1 field each (multi-select)
+    const checkboxGroups = new Set();
+    checkboxes.forEach(c => {
+      if (c.closest('.form-group') || c.closest('.form-grid') || c.closest('table')) {
+        checkboxGroups.add(c.name || 'anon_' + Math.random());
+      }
     });
-    // Numeric conversion
-    ['revenue','rdInvestment','rdRatio','debtRatio','patentCount','marketShare',
-     'productMarketShare','marketYears','equityFinancing2y','netProfit','mainRevenue',
-     'mainRevenueRatio','revenueGrowth2yAvg','netProfitRate','digitalLevel',
-     'ipHighValue','ipClass1Self','ipClass1','ipClass2','rdStaffRatio',
-     'year','materialCompleteness','totalScore'].forEach(f => {
-        if (data[f] !== undefined && data[f] !== '') data[f] = Number(data[f]);
-        else delete data[f];
+    total += inputs.length + radioGroups.size;
+  });
+  // Add sub-table rows
+  const tableRows = document.querySelectorAll('#productTableBody tr');
+  const tableCells = tableRows.length * 6;
+  document.getElementById('totalFieldCount').textContent = total + tableCells;
+}
+countFields();
+
+// ==================== Product Row ====================
+function addProductRow() {
+  const tbody = document.getElementById('productTableBody');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <td><input placeholder="产品名称"></td>
+    <td><input type="number" placeholder="产品收入（万元）"></td>
+    <td><input type="number" placeholder="日产能"></td>
+    <td><select><option>套/日</option><option>件/日</option><option>吨/日</option><option>台/日</option></select></td>
+    <td><input placeholder="知识产权名称"></td>
+    <td><button class="btn btn-outline btn-sm" onclick="alert('模拟上传')">📎 上传</button></td>
+    <td><button class="btn btn-danger btn-sm" onclick="this.closest('tr').remove()">删除</button></td>
+  `;
+  tbody.appendChild(row);
+}
+
+// ==================== Save / Submit ====================
+function collectAllData() {
+  const data = {};
+  document.querySelectorAll('.module-pane').forEach(pane => {
+    const inputs = pane.querySelectorAll('input:not([type=radio]):not([type=checkbox]), select, textarea');
+    inputs.forEach(el => {
+      const label = el.closest('.form-group')?.querySelector('label')?.textContent?.replace(/[✕✅❌⚠️💡📊📋📈💰🏦🎯🔬⭐💡🏆🔗📦📝🏢👥🔗⭐]/g,'').trim() || el.placeholder || 'field';
+      if (el.value) data[label] = el.value;
     });
-    if (data.leadProductDomain === '') data.leadProductDomain = undefined;
-    if (data.rdInstitutionLevel === '') data.rdInstitutionLevel = undefined;
-    if (data.chainDescription === '') data.chainDescription = undefined;
-    if (data.productName === '') data.productName = undefined;
-    if (data.marketShare === '') delete data.marketShare;
-    const id = data.id; delete data.id;
-    if (!id) delete data.id;
-    return { id, ...data };
+  });
+  return data;
 }
 
-async function saveDeclaration() {
-    const data = getFormData();
-    const isEdit = !!data.id;
-    try {
-        const url = isEdit ? API + '/declarations/' + data.id : API + '/declarations';
-        const method = isEdit ? 'PUT' : 'POST';
-        const res = await fetch(url, { method, headers: {'Content-Type':'application/json'}, body: JSON.stringify(data) });
-        if (!res.ok) { const err = await res.json(); alert('保存失败: ' + (err.message || '未知错误')); return; }
-        const saved = await res.json();
-        alert(isEdit ? '✅ 保存成功' : '✅ 创建成功');
-        showAiResult(saved);
-        document.querySelector('[data-tab=declarations]').click();
-    } catch(e) { alert('保存失败: ' + e.message); }
+function saveDraft() {
+  const data = collectAllData();
+  localStorage.setItem('declaration_draft', JSON.stringify(data));
+  alert('✅ 草稿已保存到本地存储！共记录 ' + Object.keys(data).length + ' 个字段。\n你可以关闭页面后重新打开恢复数据。');
 }
 
-async function saveAndSubmit() {
-    const data = getFormData();
-    const isEdit = !!data.id;
-    try {
-        let saved;
-        if (isEdit) {
-            const res = await fetch(API + '/declarations/' + data.id, { method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-            if (!res.ok) throw await res.json();
-            saved = await res.json();
-        } else {
-            const res = await fetch(API + '/declarations', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(data) });
-            if (!res.ok) throw await res.json();
-            saved = await res.json();
-        }
-        const res2 = await fetch(API + '/declarations/' + saved.id + '/submit', { method:'POST' });
-        if (!res2.ok) { const err = await res2.json(); alert('提交失败: ' + (err.message || '未知错误')); return; }
-        const submitted = await res2.json();
-        alert('✅ 提交成功！申报编号: ' + (submitted.declarationCode || '待生成'));
-        showAiResult(submitted);
-        document.querySelector('[data-tab=declarations]').click();
-    } catch(e) { alert('操作失败: ' + (e.message || JSON.stringify(e))); }
+function submitForm() {
+  const data = collectAllData();
+  localStorage.setItem('declaration_submitted', JSON.stringify(data));
+  alert('📨 申报已提交！\n\n提交数据包含 ' + Object.keys(data).length + ' 个字段。\n（演示模式：数据仅保存到浏览器本地存储）');
 }
 
-async function submitDecl(id) {
-    if (!confirm('确定要提交该申报项目吗？提交后将进入审核流程。')) return;
-    try {
-        const res = await fetch(API + '/declarations/' + id + '/submit', { method:'POST' });
-        if (!res.ok) { const err = await res.json(); alert('提交失败: ' + (err.message || '未知错误')); return; }
-        const data = await res.json();
-        alert('✅ 提交成功！申报编号: ' + (data.declarationCode || '待生成'));
-        showAiResult(data);
-        loadDeclarations(); loadStats();
-    } catch(e) { alert('提交失败: ' + e.message); }
+function resetAll() {
+  if (!confirm('确定要重置所有数据吗？')) return;
+  location.reload();
 }
 
-async function deleteDecl(id) {
-    if (!confirm('确定要删除该申报项目吗？此操作不可恢复。')) return;
-    try {
-        await fetch(API + '/declarations/' + id, { method:'DELETE' });
-        alert('✅ 已删除');
-        loadDeclarations(); loadStats();
-    } catch(e) { alert('删除失败: ' + e.message); }
-}
-
-async function aiEval(id) {
-    try {
-        const res = await fetch(API + '/declarations/' + id + '/ai-evaluate', { method:'POST' });
-        if (!res.ok) { const err = await res.json(); alert('AI评估失败: ' + (err.message || '未知错误')); return; }
-        const data = await res.json();
-        alert('✅ AI评估完成');
-        showAiResult(data);
-        loadDeclarations();
-    } catch(e) { alert('AI评估失败: ' + e.message); }
-}
-
-// ==================== View Detail ====================
-
-async function viewDetail(id) {
-    try {
-        const res = await fetch(API + '/declarations/' + id);
-        if (!res.ok) return alert('获取详情失败');
-        const d = await res.json();
-        const typeText = {XIAOJUREN:'小巨人', PROVINCIAL:'专精特新', INNOVATIVE:'创新型'}[d.type] || d.type;
-        const statusText = {DRAFT:'草稿', PENDING:'审核中', SUBMITTED:'待审核', APPROVED:'已通过', REJECTED:'已驳回'}[d.status] || d.status;
-        const statusClass = {DRAFT:'badge-draft', PENDING:'badge-pending', SUBMITTED:'badge-pending', APPROVED:'badge-approved', REJECTED:'badge-rejected'}[d.status] || 'badge-draft';
-
-        let scoresHtml = '';
-        if (d.totalScore != null) {
-            const pct = Math.min(d.totalScore, 100);
-            const color = pct >= 70 ? '#52c41a' : pct >= 50 ? '#faad14' : '#ff4d4f';
-            scoresHtml = `
-            <div class="card">
-                <div class="card-title">📊 AI评分结果</div>
-                <div style="font-size:36px;font-weight:700;color:${color};">${d.totalScore}分</div>
-                <div class="score-bar">
-                    <span style="font-size:13px;width:80px;">专业化 ${d.professionalScore||0}/25</span>
-                    <div class="score-fill"><span style="width:${(d.professionalScore||0)/25*100}%;background:#1677ff;"></span></div>
-                </div>
-                <div class="score-bar">
-                    <span style="font-size:13px;width:80px;">精细化 ${d.refinedScore||0}/25</span>
-                    <div class="score-fill"><span style="width:${(d.refinedScore||0)/25*100}%;background:#52c41a;"></span></div>
-                </div>
-                <div class="score-bar">
-                    <span style="font-size:13px;width:80px;">特色化 ${d.featureScore||0}/15</span>
-                    <div class="score-fill"><span style="width:${(d.featureScore||0)/15*100}%;background:#722ed1;"></span></div>
-                </div>
-                <div class="score-bar">
-                    <span style="font-size:13px;width:80px;">创新 ${d.innovationScoreDetail||0}/35</span>
-                    <div class="score-fill"><span style="width:${(d.innovationScoreDetail||0)/35*100}%;background:#fa8c16;"></span></div>
-                </div>
-                <div style="margin-top:8px;">
-                    <span class="badge ${d.declarationEligible ? 'badge-approved' : 'badge-rejected'}">${d.declarationEligible ? '✅ 符合申报条件' : '❌ 不符合申报条件'}</span>
-                    <span style="margin-left:8px;font-size:13px;color:var(--text-secondary);">${d.eligibleReason||''}</span>
-                </div>
-            </div>`;
-        }
-
-        let aiHtml = '';
-        const parseList = (json) => { try { return JSON.parse(json); } catch(e) { return []; } };
-        if (d.aiSuggestions && d.aiSuggestions !== '[]') {
-            const items = parseList(d.aiSuggestions);
-            if (items.length) aiHtml += `<div class="suggestion-box"><strong>💡 建议</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-        }
-        if (d.aiIssues && d.aiIssues !== '[]') {
-            const items = parseList(d.aiIssues);
-            if (items.length) aiHtml += `<div class="issue-box"><strong>⚠️ 问题</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-        }
-        if (d.aiPassedItems && d.aiPassedItems !== '[]') {
-            const items = parseList(d.aiPassedItems);
-            if (items.length) aiHtml += `<div class="passed-box"><strong>✅ 已通过项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-        }
-        if (d.aiMissingItems && d.aiMissingItems !== '[]') {
-            const items = parseList(d.aiMissingItems);
-            if (items.length) aiHtml += `<div class="missing-box"><strong>❌ 需补充项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-        }
-
-        document.getElementById('detailContent').innerHTML = `
-            <div class="card">
-                <div class="flex-between">
-                    <div><strong>${d.enterpriseName||'-'}</strong> <span class="badge ${statusClass}">${statusText}</span></div>
-                    <span class="text-secondary">${d.declarationCode || '无编号'}</span>
-                </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-top:12px;">
-                    <div><span class="text-secondary">类型：</span>${typeText}</div>
-                    <div><span class="text-secondary">级别：</span>${d.level||'-'}</div>
-                    <div><span class="text-secondary">类别：</span>${d.category||'-'}</div>
-                    <div><span class="text-secondary">年份：</span>${d.year||'-'}</div>
-                    <div><span class="text-secondary">提交时间：</span>${d.submitTime ? new Date(d.submitTime).toLocaleString() : '-'}</div>
-                    <div><span class="text-secondary">材料完整度：</span>${d.materialCompleteness || 0}%</div>
-                </div>
-            </div>
-            <div class="card">
-                <div class="card-title">📊 财务数据</div>
-                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-                    <div><span class="text-secondary">营收：</span>${d.revenue ? d.revenue+'万元' : '-'}</div>
-                    <div><span class="text-secondary">研发投入：</span>${d.rdInvestment ? d.rdInvestment+'万元' : '-'}</div>
-                    <div><span class="text-secondary">研发占比：</span>${d.rdRatio != null ? d.rdRatio+'%' : '-'}</div>
-                    <div><span class="text-secondary">资产负债率：</span>${d.debtRatio != null ? d.debtRatio+'%' : '-'}</div>
-                    <div><span class="text-secondary">净利润：</span>${d.netProfit != null ? d.netProfit+'万元' : '-'}</div>
-                    <div><span class="text-secondary">发明专利：</span>${d.patentCount != null ? d.patentCount+'件' : '-'}</div>
-                    <div><span class="text-secondary">主导产品：</span>${d.productName||'-'}</div>
-                    <div><span class="text-secondary">市场占有率：</span>${d.productMarketShare != null ? d.productMarketShare+'%' : '-'}</div>
-                </div>
-            </div>
-            ${scoresHtml}
-            ${aiHtml}
-            ${d.reviewComment ? `<div class="card"><div class="card-title">📝 审核意见</div><p>${d.reviewComment}</p></div>` : ''}
-            <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
-                ${d.status === 'DRAFT' ? `<button class="btn btn-primary" onclick="editDecl(${d.id});closeDetail();">编辑</button>` : ''}
-                ${d.status === 'DRAFT' ? `<button class="btn btn-success" onclick="submitDecl(${d.id})">提交</button>` : ''}
-                <button class="btn btn-outline" onclick="closeDetail()">关闭</button>
-            </div>
-        `;
-        document.getElementById('detailModal').classList.add('active');
-    } catch(e) { alert('获取详情失败: ' + e.message); }
-}
-
-function closeDetail() {
-    document.getElementById('detailModal').classList.remove('active');
-}
-
-// ==================== Edit Declaration ====================
-
-async function editDecl(id) {
-    try {
-        const res = await fetch(API + '/declarations/' + id);
-        const d = await res.json();
-        populateForm(d);
-        document.querySelector('[data-tab=new]').click();
-    } catch(e) { alert('加载编辑数据失败: ' + e.message); }
-}
-
-function populateForm(d) {
-    const form = document.getElementById('declForm');
-    Object.keys(d).forEach(k => {
-        const el = form.querySelector(`[name="${k}"]`);
-        if (!el) return;
-        if (el.type === 'checkbox') el.checked = !!d[k];
-        else if (d[k] != null) el.value = d[k];
-    });
-    document.getElementById('formTitle').textContent = '编辑申报项目 (ID: ' + d.id + ')';
-}
-
-function resetForm() {
-    document.getElementById('declForm').reset();
-    document.querySelectorAll('#declForm input[type=checkbox]').forEach(c => c.checked = false);
-    document.getElementById('formTitle').textContent = '新建申报项目';
-    document.getElementById('declForm').querySelector('[name="id"]').value = '';
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
-    document.querySelector('[data-tab="declarations"]').classList.add('active');
-    document.getElementById('tab-declarations').style.display = 'block';
-    loadDeclarations();
-    loadStats();
-}
-
-function showAiResult(d) {
-    const box = document.getElementById('aiResultBox');
-    const parseList = (json) => { try { return JSON.parse(json); } catch(e) { return []; } };
-    let html = '<div class="card"><div class="card-title">🤖 AI 评估报告</div>';
-    if (d.totalScore != null) {
-        const color = d.totalScore >= 70 ? '#52c41a' : '#ff4d4f';
-        html += `<div style="font-size:24px;font-weight:700;color:${color};">总分: ${d.totalScore}分</div>`;
+// Auto-restore draft on load
+window.addEventListener('DOMContentLoaded', function() {
+  const saved = localStorage.getItem('declaration_draft');
+  if (saved) {
+    if (confirm('检测到本地有保存的草稿，是否恢复？')) {
+      try {
+        const data = JSON.parse(saved);
+        // Not practical to restore all fields in this static demo,
+        // but we show the count
+        alert('已检测到草稿数据，包含 ' + Object.keys(data).length + ' 个字段。\n（自动填充仅演示，实际需映射每个字段）');
+      } catch(e) {}
     }
-    if (d.declarationEligible != null) {
-        html += `<p><span class="badge ${d.declarationEligible ? 'badge-approved' : 'badge-rejected'}">${d.declarationEligible ? '符合申报条件' : '不符合申报条件'}</span></p>`;
-    }
-    if (d.aiSuggestions && d.aiSuggestions !== '[]') {
-        const items = parseList(d.aiSuggestions);
-        if (items.length) html += `<div class="suggestion-box"><strong>💡 建议</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-    }
-    if (d.aiPassedItems && d.aiPassedItems !== '[]') {
-        const items = parseList(d.aiPassedItems);
-        if (items.length) html += `<div class="passed-box"><strong>✅ 已通过项</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-    }
-    if (d.aiMissingItems && d.aiMissingItems !== '[]') {
-        const items = parseList(d.aiMissingItems);
-        if (items.length) html += `<div class="missing-box"><strong>❌ 需补充</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-    }
-    if (d.aiIssues && d.aiIssues !== '[]') {
-        const items = parseList(d.aiIssues);
-        if (items.length) html += `<div class="issue-box"><strong>⚠️ 问题</strong><ul>${items.map(i => `<li>${typeof i === 'object' ? (i.text||JSON.stringify(i)) : i}</li>`).join('')}</ul></div>`;
-    }
-    html += '</div>';
-    box.innerHTML = html;
-    box.style.display = 'block';
-}
-
-// ==================== Materials ====================
-
-async function loadDeclSelect() {
-    try {
-        const res = await fetch(API + '/declarations?keyword=&status=&type=&page=0&size=100');
-        const data = await res.json();
-        const sel = document.getElementById('materialDeclSelect');
-        const current = sel.value;
-        sel.innerHTML = '<option value="">-- 请选择申报项目 --</option>' +
-            (data.content || []).map(d => `<option value="${d.id}">${d.declarationCode||'#'+d.id} ${d.enterpriseName||''} (${d.type})</option>`).join('');
-        if (current) sel.value = current;
-    } catch(e) { console.error(e); }
-}
-
-async function loadMaterials() {
-    const declId = document.getElementById('materialDeclSelect').value;
-    const container = document.getElementById('materialList');
-    if (!declId) {
-        container.innerHTML = '<div class="text-center text-secondary" style="padding:40px;">请先选择一个申报项目</div>';
-        return;
-    }
-    try {
-        const res = await fetch(API + '/declarations/' + declId + '/materials');
-        if (!res.ok) { container.innerHTML = '<div class="text-secondary">加载失败</div>'; return; }
-        const items = await res.json();
-        if (!items.length) {
-            container.innerHTML = '<div class="text-secondary">该申报暂无材料清单</div>';
-            return;
-        }
-        const groups = {};
-        items.forEach(m => {
-            if (!groups[m.materialType]) groups[m.materialType] = [];
-            groups[m.materialType].push(m);
-        });
-        const statusMap = {MISSING:'缺失', UPLOADED:'已上传', IDENTIFIED:'已识别', VERIFIED:'已确认'};
-        const statusClass = {MISSING:'badge-rejected', UPLOADED:'badge-pending', IDENTIFIED:'badge-pending', VERIFIED:'badge-approved'};
-        let html = '';
-        Object.entries(groups).forEach(([group, mats]) => {
-            html += `<div class="material-group"><h4>${group}</h4>`;
-            mats.forEach(m => {
-                html += `<div class="material-item">
-                    <div>
-                        <span class="name">${m.materialName}</span>
-                        ${m.required === 1 ? '<span class="required">*必交</span>' : '<span class="text-secondary" style="font-size:11px;">选交</span>'}
-                    </div>
-                    <div class="flex gap-2">
-                        <span class="badge ${statusClass[m.status]||'badge-draft'}">${statusMap[m.status]||m.status}</span>
-                        <button class="btn btn-outline btn-sm" onclick="updateMaterialStatus(${m.id},'UPLOADED')">标记上传</button>
-                    </div>
-                </div>`;
-            });
-            html += '</div>';
-        });
-        container.innerHTML = html;
-    } catch(e) { container.innerHTML = '<div class="text-secondary">加载失败: ' + e.message + '</div>'; }
-}
-
-async function updateMaterialStatus(materialId, status) {
-    try {
-        const res = await fetch(API + '/declarations/materials/' + materialId, {
-            method:'PUT',
-            headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({status})
-        });
-        if (!res.ok) { const err = await res.json(); alert('操作失败: ' + (err.message||'')); return; }
-        loadMaterials();
-    } catch(e) { alert('操作失败: ' + e.message); }
-}
-
-// ==================== Init ====================
-
-// Click outside modal to close
-document.getElementById('detailModal').addEventListener('click', function(e) {
-    if (e.target === this) closeDetail();
+  }
+  // Update header field count
+  const totalFields = document.querySelector('#moduleTabs .module-tab:last-child').offsetTop;
+  const allFields = document.querySelectorAll('.module-pane input:not([type=radio]):not([type=checkbox]), .module-pane select, .module-pane textarea').length;
+  document.querySelector('.header .sub').textContent = '数据字典全覆盖 · 12 大模块 · ' + allFields + '+ 个字段';
 });
-
-loadStats();
-loadDeclarations();
 </script>
+
 </body>
 </html>
