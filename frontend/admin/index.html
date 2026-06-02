@@ -58,6 +58,10 @@ tr:hover td{background:#f9f0ff}
 .login-card button{width:100%;padding:10px;font-size:15px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer}
 .flex{display:flex;gap:8px;align-items:center}
 .mb-2{margin-bottom:12px}.text-secondary{color:var(--text2)}.text-center{text-align:center}
+.form-group{margin-bottom:12px}
+.form-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:4px;font-weight:500}
+.form-group .ai-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;background:#fff;max-width:480px}
+.form-group .ai-input:focus{border-color:var(--primary)}
 @media(max-width:900px){.app-layout{flex-direction:column}.sidebar{width:100%;display:flex;gap:2px;overflow-x:auto}.sidebar button{white-space:nowrap;border-left:none;border-bottom:2px solid transparent;border-radius:0}.sidebar button.active{border-bottom-color:var(--primary)}}
 </style>
 </head>
@@ -77,6 +81,7 @@ tr:hover td{background:#f9f0ff}
       <button class="active" data-page="dashboard">📊 总览</button>
       <button data-page="review">📑 申报审核</button>
       <button data-page="enterprises">🏢 企业管理</button>
+      <button data-page="aisettings" onclick="loadAiSettings()">🤖 模型设置</button>
     </div>
     <div class="main-content">
       <div class="page active" id="page-dashboard">
@@ -97,6 +102,15 @@ tr:hover td{background:#f9f0ff}
       <div class="page" id="page-enterprises">
         <div class="card-title" style="margin-bottom:12px">🏢 企业管理</div>
         <div id="entContent"></div>
+      </div>
+      <div class="page" id="page-aisettings">
+        <div class="card-title">🤖 模型设置</div>
+        <div class="card">
+          <div class="form-group"><label>模型链接</label><input id="aiBaseUrl" class="ai-input" placeholder="http://localhost:8000"></div>
+          <div class="form-group"><label>模型名称</label><input id="aiModel" class="ai-input" placeholder="gpt-4o-vision"></div>
+          <div class="form-group"><label>模型密钥</label><input id="aiApiKey" class="ai-input" type="password" placeholder="sk-..."></div>
+          <div style="margin-top:12px"><button class="btn btn-primary" onclick="saveAiConfig()">💾 保存设置</button><span id="aiConfigStatus" class="text-secondary" style="margin-left:10px;font-size:13px"></span></div>
+        </div>
       </div>
     </div>
   </div>
@@ -132,6 +146,7 @@ function switchPage(p){
   document.querySelectorAll('.main-content .page').forEach(x=>x.classList.toggle('active',x.id==='page-'+p))
   if(p==='dashboard')loadDash()
   if(p==='review')loadReview()
+  if(p==='aisettings')loadAiSettings()
 }
 document.querySelectorAll('#sidebar button').forEach(b=>b.onclick=()=>switchPage(b.dataset.page))
 
@@ -154,6 +169,30 @@ function viewDecl(id){api('GET','/declarations/'+id).then(d=>{showModal('<h3>�
 function openReview(id){api('GET','/declarations/'+id).then(d=>{const s=d.totalScore||0;showModal('<h3>📑 审核 #'+d.id+' - '+d.enterpriseName+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;font-size:13px"><div>营收：'+(d.revenue||'-')+'万</div><div>研发：'+(d.rdInvestment||'-')+'万 ('+(d.rdRatio||'-')+'%)</div><div>产品：'+(d.productName||'-')+'</div><div>细分年限：'+(d.marketYears||'-')+'年</div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;text-align:center"><div style="padding:8px;background:#f0f5ff;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#1677ff">'+(d.professionalScore||0)+'</div><div style="font-size:11px;color:var(--text2)">专业化/25</div></div><div style="padding:8px;background:#f6ffed;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#52c41a">'+(d.refinedScore||0)+'</div><div style="font-size:11px;color:var(--text2)">精细化/25</div></div><div style="padding:8px;background:#fff7e6;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#d48806">'+(d.featureScore||0)+'</div><div style="font-size:11px;color:var(--text2)">特色化/15</div></div><div style="padding:8px;background:#f9f0ff;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#722ed1">'+(d.innovationScoreDetail||0)+'</div><div style="font-size:11px;color:var(--text2)">创新力/35</div></div></div><div style="text-align:center;font-weight:600;padding:8px;background:#fafafa;border-radius:6px">总分：<span style="color:#722ed1">'+s+'</span>/100 '+(d.declarationEligible?'<span class="tag tag-green">符合条件</span>':'<span class="tag tag-red">不符合</span>')+'</div><div style="margin-top:12px"><label style="font-size:13px;font-weight:500">审核意见：</label><textarea id="reviewComment" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-top:4px;outline:none"></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="doReview('+id+',\'APPROVED\')">✅ 通过</button><button class="btn btn-danger" onclick="doReview('+id+',\'REJECTED\')">❌ 驳回</button></div>')}).catch(()=>toast('加载失败','error'))}
 
 function doReview(id,status){const c=document.getElementById('reviewComment')?.value||'';api('POST','/declarations/'+id+'/review',{status,reviewComment:c}).then(()=>{toast(status==='APPROVED'?'✅ 已通过':'已驳回');closeModal();loadReview();loadDash()}).catch(e=>toast(e.message||'操作失败','error'))}
+
+// ===== AI Settings =====
+function loadAiSettings(){
+  api('GET','/ai/config').then(c=>{
+    document.getElementById('aiBaseUrl').value=c.baseUrl||''
+    document.getElementById('aiModel').value=c.model||''
+    document.getElementById('aiApiKey').value=c.apiKey||''
+    document.getElementById('aiConfigStatus').textContent=''
+  }).catch(()=>{document.getElementById('aiConfigStatus').textContent='加载失败';document.getElementById('aiConfigStatus').style.color='var(--danger)'})
+}
+
+function saveAiConfig(){
+  const body={baseUrl:document.getElementById('aiBaseUrl').value.trim(),model:document.getElementById('aiModel').value.trim(),apiKey:document.getElementById('aiApiKey').value.trim()}
+  if(!body.baseUrl||!body.model){document.getElementById('aiConfigStatus').textContent='模型链接和名称为必填';document.getElementById('aiConfigStatus').style.color='var(--danger)';return}
+  document.getElementById('aiConfigStatus').textContent='保存中...'
+  api('PUT','/ai/config',body).then(()=>{
+    document.getElementById('aiConfigStatus').textContent='✅ 已保存'
+    document.getElementById('aiConfigStatus').style.color='var(--success)'
+    toast('模型设置已更新')
+  }).catch(e=>{
+    document.getElementById('aiConfigStatus').textContent=e.message||'保存失败'
+    document.getElementById('aiConfigStatus').style.color='var(--danger)'
+  })
+}
 </script>
 </body>
 </html>

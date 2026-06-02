@@ -3,13 +3,12 @@ package com.gz.enterprise.application.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gz.enterprise.application.config.AiConfigStore;
 import com.gz.enterprise.application.config.DeepSeekProperties;
-import com.gz.enterprise.application.domain.DeclarationMaterial;
 import com.gz.enterprise.application.domain.Document;
 import com.gz.enterprise.application.repository.DeclarationMaterialRepository;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class OcrService {
 
     private final DeepSeekProperties props;
+    private final AiConfigStore aiConfigStore;
     private final DeclarationMaterialRepository materialRepo;
     private final FileStorageService fileStorageService;
     private final RestClient.Builder restClientBuilder;
@@ -35,9 +35,11 @@ public class OcrService {
     private static final long MAX_SIZE = 10 * 1024 * 1024L;
 
     private RestClient aiClient() {
+        String baseUrl = aiConfigStore.getBaseUrl();
+        String apiKey = aiConfigStore.getApiKey();
         return restClientBuilder
-                .baseUrl(props.getBaseUrl())
-                .defaultHeader("Authorization", "Bearer " + props.getApiKey())
+                .baseUrl(baseUrl)
+                .defaultHeader("Authorization", "Bearer " + apiKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
@@ -126,7 +128,7 @@ public class OcrService {
                 "province/city/district从fullAddress中解析提取。");
 
         return Map.of(
-                "model", props.getModel(),
+                "model", aiConfigStore.getModel(),
                 "max_tokens", props.getMaxTokens(),
                 "messages", List.of(
                         Map.of("role", "system", "content", systemPrompt),
