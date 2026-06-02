@@ -8,6 +8,7 @@ import com.gz.enterprise.application.config.DeepSeekProperties;
 import com.gz.enterprise.application.domain.Document;
 import com.gz.enterprise.application.repository.DeclarationMaterialRepository;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public class OcrService {
     private RestClient aiClient() {
         String baseUrl = aiConfigStore.getBaseUrl();
         String apiKey = aiConfigStore.getApiKey();
-        // Simple redirect-following: if baseUrl is http, try https
+        // Normalize: if http:// was configured, switch to https://
         String effectiveUrl = baseUrl;
         if (effectiveUrl.startsWith("http://")) {
             effectiveUrl = "https://" + effectiveUrl.substring(8);
@@ -46,6 +47,11 @@ public class OcrService {
                 .baseUrl(effectiveUrl)
                 .defaultHeader("api-key", apiKey)
                 .defaultHeader("Content-Type", "application/json")
+                .requestFactory(new org.springframework.http.client.JdkClientHttpRequestFactory(
+                    java.net.http.HttpClient.newBuilder()
+                        .connectTimeout(Duration.ofSeconds(30))
+                        .build()
+                ))
                 .build();
     }
 

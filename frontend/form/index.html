@@ -564,6 +564,7 @@ function startBlOcr() {
 
   const xhr = new XMLHttpRequest()
   xhr.open('POST', API + '/declarations/' + curId + '/ocr/business-license')
+  xhr.timeout = 180000 // 3 minutes for OCR
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {
@@ -585,6 +586,12 @@ function startBlOcr() {
     $('bl-progress').style.display = 'none'
     $('bl-preview').style.display = 'flex'
     toast('网络错误，请重试', 'error')
+  }
+
+  xhr.ontimeout = () => {
+    $('bl-progress').style.display = 'none'
+    $('bl-preview').style.display = 'flex'
+    toast('识别超时，请稍后重试', 'error')
   }
 
   xhr.send(formData)
