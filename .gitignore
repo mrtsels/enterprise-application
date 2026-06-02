@@ -25,3 +25,6 @@ logs/
 # Env
 .env
 *.local.json
+
+# Docs
+*.docx
