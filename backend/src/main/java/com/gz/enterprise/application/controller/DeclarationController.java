@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * 申报项目管理 — 企业提交申报材料 & 填写申报项目
@@ -110,5 +111,14 @@ public class DeclarationController {
     @GetMapping("/stats")
     public Map<String, Object> stats() {
         return declarationService.getStats();
+    }
+
+    // ==================== 营业执照OCR ====================
+
+    @PostMapping("/{id}/ocr/business-license")
+    public Map<String, Object> ocrBusinessLicense(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        return declarationService.recognizeBusinessLicense(file, id);
     }
 }

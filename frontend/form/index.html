@@ -49,6 +49,29 @@ body{background:#f0f2f5;color:#262626}
 .modal-overlay.show{display:flex}
 .modal{background:#fff;border-radius:var(--radius);padding:24px;min-width:380px;max-width:90vw;max-height:90vh;overflow-y:auto}
 .modal h3{font-size:15px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+
+/* Business License Upload */
+.bl-upload-card{background:#fafcff;border:1px dashed #1677ff;border-radius:8px;margin-bottom:14px;overflow:hidden}
+.bl-upload-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#f0f5ff;border-bottom:1px solid #e6f0ff}
+.bl-upload-title{font-size:13px;font-weight:600;color:#1677ff}
+.bl-upload-badge{font-size:11px;padding:2px 8px;border-radius:10px;background:#d9d9d9;color:#595959}
+.bl-upload-badge.success{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
+.bl-upload-badge.uploaded{background:#e6f7ff;color:#1677ff;border:1px solid #91d5ff}
+.bl-upload-body{padding:12px}
+.bl-dropzone{border:2px dashed #d9d9d9;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
+.bl-dropzone:hover,.bl-dropzone.dragover{border-color:#1677ff;background:#f0f5ff}
+.bl-dropzone-icon{font-size:32px;margin-bottom:6px}
+.bl-dropzone-text{font-size:14px;color:#262626;font-weight:500}
+.bl-dropzone-hint{font-size:12px;color:#8c8c8c;margin-top:4px}
+.bl-preview{display:flex;flex-direction:column;align-items:center;gap:8px}
+.bl-preview-img{max-height:160px;max-width:100%;border-radius:6px;border:1px solid #e8e8e8;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.bl-preview-actions{display:flex;gap:8px}
+.bl-progress{text-align:center}
+.bl-progress-bar{height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;margin:8px 0}
+.bl-progress-fill{height:100%;background:#1677ff;border-radius:3px;width:0%;transition:width .3s}
+.bl-progress-text{font-size:12px;color:#8c8c8c}
+.ocr-badge{display:inline-block;font-size:11px;color:#52c41a;background:#f6ffed;border:1px solid #b7eb8f;border-radius:3px;padding:1px 5px;margin-left:6px;font-weight:500}
+
 @media(max-width:768px){.form-row{flex-direction:column}.form-row>label{min-width:auto}.opt-row{padding-left:0}}
 </style>
 </head>
@@ -121,6 +144,7 @@ async function init(){
     try{ent=await api('GET','/enterprises/'+enterpriseId);$('headerName').textContent=ent.name}catch(e){}
   }
   renderForm()
+  initBlUpload()
   // Load existing declaration
   if(curId){
     try{
@@ -147,6 +171,38 @@ function renderForm(){
   $('formContent').innerHTML = `
 <div class="card sec-pane active" id="sec-1">
 <div class="card-title">一、企业基本情况</div>
+
+<!-- ===== Business License OCR Upload ===== -->
+<div class="bl-upload-card">
+  <div class="bl-upload-header">
+    <span class="bl-upload-title">📎 营业执照（副本）识别</span>
+    <span class="bl-upload-badge" id="bl-status-badge">未上传</span>
+  </div>
+  <div class="bl-upload-body">
+    <!-- Drop zone -->
+    <div class="bl-dropzone" id="bl-dropzone">
+      <div class="bl-dropzone-icon">📄</div>
+      <div class="bl-dropzone-text">点击或拖拽上传营业执照</div>
+      <div class="bl-dropzone-hint">支持 JPG/PNG，不超过 10MB</div>
+      <input type="file" id="bl-file-input" accept=".jpg,.jpeg,.png" hidden>
+    </div>
+    <!-- Preview -->
+    <div class="bl-preview" id="bl-preview" style="display:none">
+      <img id="bl-preview-img" class="bl-preview-img">
+      <div class="bl-preview-actions">
+        <button class="btn btn-sm btn-outline" onclick="resetBlUpload()" type="button">重新选择</button>
+        <button class="btn btn-sm btn-primary" onclick="startBlOcr()" type="button">🔍 识别营业执照</button>
+      </div>
+    </div>
+    <!-- Progress -->
+    <div class="bl-progress" id="bl-progress" style="display:none">
+      <div class="bl-progress-bar"><div class="bl-progress-fill" id="bl-progress-fill"></div></div>
+      <div class="bl-progress-text" id="bl-progress-text">正在上传并识别...</div>
+    </div>
+  </div>
+</div>
+<!-- ===== END NEW ===== -->
+
 <div class="form-row"><label>企业名称 <span class="req">*</span></label><input id="f_name" value="${ent?ent.name:'广州测试科技有限公司'}"></div>
 <div class="form-row"><label>统一社会信用代码</label><input id="f_creditCode" value="91440101MA5XXXXXXX"></div>
 <div class="sec-sub">企业注册地</div>
@@ -457,6 +513,184 @@ function resetForm(){
   if(!confirm('确定重置所有表单数据吗？'))return
   document.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(e=>{const v=e.getAttribute('value');if(e.type==='number')e.value=v||'';else e.value=v||''})
   toast('已重置')
+}
+
+// ===== Business License OCR =====
+let blFile = null
+
+function initBlUpload() {
+  const dropzone = $('bl-dropzone'), fileInput = $('bl-file-input')
+  if (!dropzone || !fileInput) return
+  dropzone.onclick = () => fileInput.click()
+  fileInput.onchange = (e) => { if (e.target.files.length > 0) handleBlFile(e.target.files[0]) }
+  dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover') }
+  dropzone.ondragleave = () => dropzone.classList.remove('dragover')
+  dropzone.ondrop = (e) => {
+    e.preventDefault(); dropzone.classList.remove('dragover')
+    if (e.dataTransfer.files.length > 0) handleBlFile(e.dataTransfer.files[0])
+  }
+}
+
+function handleBlFile(file) {
+  const validTypes = ['image/jpeg', 'image/png']
+  if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png)$/i)) {
+    toast('仅支持 JPG 或 PNG 格式', 'error'); return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    toast('文件大小不能超过 10MB', 'error'); return
+  }
+  blFile = file
+  $('bl-dropzone').style.display = 'none'
+  $('bl-preview').style.display = 'flex'
+  $('bl-progress').style.display = 'none'
+  const reader = new FileReader()
+  reader.onload = (e) => { $('bl-preview-img').src = e.target.result }
+  reader.readAsDataURL(file)
+  $('bl-status-badge').textContent = '已选择'
+  $('bl-status-badge').className = 'bl-upload-badge uploaded'
+}
+
+function startBlOcr() {
+  if (!blFile) { toast('请先选择营业执照图片', 'error'); return }
+  if (!curId) { toast('请先保存申报草稿', 'error'); return }
+
+  $('bl-preview').style.display = 'none'
+  $('bl-progress').style.display = 'block'
+  $('bl-progress-fill').style.width = '10%'
+  $('bl-progress-text').textContent = '正在上传...'
+
+  const formData = new FormData()
+  formData.append('file', blFile)
+
+  const xhr = new XMLHttpRequest()
+  xhr.open('POST', API + '/declarations/' + curId + '/ocr/business-license')
+
+  xhr.upload.onprogress = (e) => {
+    if (e.lengthComputable) {
+      const pct = Math.round((e.loaded / e.total) * 50)
+      $('bl-progress-fill').style.width = Math.min(pct, 50) + '%'
+    }
+  }
+
+  xhr.onload = function () {
+    if (xhr.status >= 200 && xhr.status < 300) {
+      $('bl-progress-fill').style.width = '90%'
+      $('bl-progress-text').textContent = '识别完成，正在填充表单...'
+      const result = JSON.parse(xhr.responseText)
+      setTimeout(() => applyBlOcrResult(result), 300)
+    } else { handleOcrError(xhr) }
+  }
+
+  xhr.onerror = () => {
+    $('bl-progress').style.display = 'none'
+    $('bl-preview').style.display = 'flex'
+    toast('网络错误，请重试', 'error')
+  }
+
+  xhr.send(formData)
+}
+
+function applyBlOcrResult(data) {
+  $('bl-progress-fill').style.width = '100%'
+  $('bl-progress-text').textContent = '✅ 识别完成'
+  $('bl-status-badge').textContent = '已识别'
+  $('bl-status-badge').className = 'bl-upload-badge success'
+
+  setTimeout(() => {
+    $('bl-progress').style.display = 'none'
+    $('bl-preview').style.display = 'flex'
+  }, 800)
+
+  // Field mapping: OCR JSON key → form field ID
+  const mapping = [
+    { id: 'f_name', key: 'companyName' },
+    { id: 'f_creditCode', key: 'creditCode' },
+    { id: 'f_legalRep', key: 'legalRepresentative' },
+    { id: 'f_estDate', key: 'establishedDate' },
+    { id: 'f_address', key: 'fullAddress' },
+  ]
+
+  let filled = 0
+  for (const { id, key } of mapping) {
+    const el = $(id), val = data[key]
+    if (el && val && val !== 'null' && val !== '') {
+      el.value = val
+      addOcrBadge(id)
+      filled++
+    }
+  }
+
+  // Registered capital (number)
+  const capEl = $('f_regCapital')
+  if (capEl && data.capitalAmount != null && data.capitalAmount !== 'null') {
+    capEl.value = data.capitalAmount
+    addOcrBadge('f_regCapital')
+    filled++
+  }
+
+  // Province select
+  if (data.province && $('f_province')) {
+    const sel = $('f_province')
+    for (const opt of sel.options) {
+      if (opt.value === data.province) {
+        sel.value = data.province
+        sel.dispatchEvent(new Event('change'))
+        addOcrBadge('f_province')
+        break
+      }
+    }
+  }
+  // City select (after province change populates cities)
+  if (data.city && $('f_city')) {
+    setTimeout(() => {
+      const sel = $('f_city')
+      for (const opt of sel.options) {
+        if (opt.value === data.city) { sel.value = data.city; sel.dispatchEvent(new Event('change')); addOcrBadge('f_city'); break }
+      }
+    }, 100)
+  }
+  // District select (after city change populates districts)
+  if (data.district && $('f_district')) {
+    setTimeout(() => {
+      for (const opt of $('f_district').options) {
+        if (opt.value === data.district) { $('f_district').value = data.district; addOcrBadge('f_district'); break }
+      }
+    }, 200)
+  }
+
+  toast('营业执照识别成功，已自动填充 ' + filled + ' 个字段', 'success')
+}
+
+function addOcrBadge(fieldId) {
+  const el = $(fieldId)
+  if (!el) return
+  const existing = el.parentElement.querySelector('.ocr-badge')
+  if (existing) existing.remove()
+  const badge = document.createElement('span')
+  badge.className = 'ocr-badge'
+  badge.textContent = 'OCR ✓'
+  el.insertAdjacentElement('afterend', badge)
+}
+
+function handleOcrError(xhr) {
+  $('bl-progress').style.display = 'none'
+  $('bl-preview').style.display = 'flex'
+  try {
+    const err = JSON.parse(xhr.responseText)
+    toast(err.message || '识别失败，请重试', 'error')
+  } catch (e) {
+    toast('识别失败 (HTTP ' + xhr.status + ')', 'error')
+  }
+}
+
+function resetBlUpload() {
+  blFile = null
+  $('bl-dropzone').style.display = 'block'
+  $('bl-preview').style.display = 'none'
+  $('bl-progress').style.display = 'none'
+  $('bl-status-badge').textContent = '未上传'
+  $('bl-status-badge').className = 'bl-upload-badge'
+  $('bl-file-input').value = ''
 }
 
 // Init

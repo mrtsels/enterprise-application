@@ -4,6 +4,7 @@ import com.gz.enterprise.application.domain.Declaration;
 import com.gz.enterprise.application.domain.DeclarationMaterial;
 import com.gz.enterprise.application.repository.DeclarationMaterialRepository;
 import com.gz.enterprise.application.repository.DeclarationRepository;
+import com.gz.enterprise.application.service.OcrService;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class DeclarationService {
 
     private final DeclarationRepository declarationRepo;
     private final DeclarationMaterialRepository materialRepo;
+    private final OcrService ocrService;
 
     // ==================== 申报项目 CRUD ====================
 
@@ -462,6 +465,22 @@ public class DeclarationService {
     }
 
     // ==================== 材料操作 ====================
+
+    /**
+     * OCR识别营业执照，自动查找该申报的"营业执照（副本）"材料记录
+     */
+    @Transactional
+    public Map<String, Object> recognizeBusinessLicense(MultipartFile file, Long declarationId) {
+        Declaration declaration = get(declarationId);
+
+        List<DeclarationMaterial> materials = materialRepo.findByDeclarationId(declarationId);
+        DeclarationMaterial blMaterial = materials.stream()
+                .filter(m -> "营业执照（副本）".equals(m.getMaterialName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("未找到营业执照材料记录，请先创建申报"));
+
+        return ocrService.recognize(file, declarationId, blMaterial.getId());
+    }
 
     public List<DeclarationMaterial> listMaterials(Long declarationId) {
         return materialRepo.findByDeclarationId(declarationId);

@@ -29,9 +29,14 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/enterprise_mvp?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: enterprise
       SPRING_DATASOURCE_PASSWORD: enterprise123
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      UPLOAD_PATH: /app/uploads
       TZ: Asia/Shanghai
     ports:
       - "8080:8080"
+    volumes:
+      - upload_data:/app/uploads
 
 volumes:
   mysql_data:
+  upload_data:
