@@ -564,7 +564,7 @@ function startBlOcr() {
 
   const xhr = new XMLHttpRequest()
   xhr.open('POST', API + '/declarations/' + curId + '/ocr/business-license')
-  xhr.timeout = 180000 // 3 minutes for OCR
+  xhr.timeout = 30000 // 30 seconds for OCR
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {

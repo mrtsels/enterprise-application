@@ -37,7 +37,7 @@ ai:
     api-key: ${AI_VISION_KEY:sk-placeholder}
     base-url: ${AI_VISION_URL:http://localhost:8000}
     model: ${AI_VISION_MODEL:gpt-4o-vision}
-    max-tokens: 4096
+    max-tokens: 81920
 
 app:
   upload:

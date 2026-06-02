@@ -129,6 +129,7 @@ public class OcrService {
         return Map.of(
                 "model", aiConfigStore.getModel(),
                 "max_tokens", props.getMaxTokens(),
+                "reasoning", false,
                 "messages", List.of(
                         Map.of("role", "system", "content", systemPrompt),
                         Map.of("role", "user", "content", List.of(
