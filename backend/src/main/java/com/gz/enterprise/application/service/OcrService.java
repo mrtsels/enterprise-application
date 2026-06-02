@@ -52,7 +52,7 @@ public class OcrService {
      * @param materialId    declaration material record ID
      * @return extracted fields as Map
      */
-    public Map<String, Object> recognize(MultipartFile file, Long declarationId, Long materialId) {
+    public Map<String, Object> recognize(MultipartFile file, Long declarationId, Long materialId, Long enterpriseId) {
         // === Validate file ===
         if (file.isEmpty()) {
             throw new IllegalArgumentException("文件为空");
@@ -62,7 +62,7 @@ public class OcrService {
         }
 
         // === Save file and create Document ===
-        Document doc = fileStorageService.store(file, null, declarationId, "基础资质");
+        Document doc = fileStorageService.store(file, enterpriseId, declarationId, "基础资质");
 
         // === Encode image to Base64 ===
         String base64Image;

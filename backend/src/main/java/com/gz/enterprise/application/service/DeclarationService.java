@@ -479,7 +479,7 @@ public class DeclarationService {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("未找到营业执照材料记录，请先创建申报"));
 
-        return ocrService.recognize(file, declarationId, blMaterial.getId());
+        return ocrService.recognize(file, declarationId, blMaterial.getId(), declaration.getEnterpriseId());
     }
 
     public List<DeclarationMaterial> listMaterials(Long declarationId) {
