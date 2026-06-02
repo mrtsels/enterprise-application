@@ -26,5 +26,11 @@ logs/
 .env
 *.local.json
 
+# AI config (contains API keys)
+**/ai-config.json
+
+# Uploads
+**/uploads/
+
 # Docs
 *.docx

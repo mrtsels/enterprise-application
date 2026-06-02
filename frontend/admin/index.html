@@ -62,6 +62,11 @@ tr:hover td{background:#f9f0ff}
 .form-group label{display:block;font-size:13px;color:var(--text2);margin-bottom:4px;font-weight:500}
 .form-group .ai-input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;background:#fff;max-width:480px}
 .form-group .ai-input:focus{border-color:var(--primary)}
+.prompt-entry{margin-bottom:12px}
+.prompt-header{margin-bottom:4px}
+.prompt-name{font-size:13px;font-weight:600;color:#262626}
+.prompt-textarea{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:inherit;resize:vertical;outline:none;max-width:640px}
+.prompt-textarea:focus{border-color:var(--primary)}
 @media(max-width:900px){.app-layout{flex-direction:column}.sidebar{width:100%;display:flex;gap:2px;overflow-x:auto}.sidebar button{white-space:nowrap;border-left:none;border-bottom:2px solid transparent;border-radius:0}.sidebar button.active{border-bottom-color:var(--primary)}}
 </style>
 </head>
@@ -81,7 +86,7 @@ tr:hover td{background:#f9f0ff}
       <button class="active" data-page="dashboard">📊 总览</button>
       <button data-page="review">📑 申报审核</button>
       <button data-page="enterprises">🏢 企业管理</button>
-      <button data-page="aisettings" onclick="loadAiSettings()">🤖 模型设置</button>
+      <button data-page="aisettings" onclick="loadAiSettings()">🔧 识别设置</button>
     </div>
     <div class="main-content">
       <div class="page active" id="page-dashboard">
@@ -104,13 +109,18 @@ tr:hover td{background:#f9f0ff}
         <div id="entContent"></div>
       </div>
       <div class="page" id="page-aisettings">
-        <div class="card-title">🤖 模型设置</div>
+        <div class="card-title">🔧 识别设置</div>
         <div class="card">
+          <div class="card-title">🤖 模型设置</div>
           <div class="form-group"><label>模型链接</label><input id="aiBaseUrl" class="ai-input" placeholder="http://localhost:8000"></div>
           <div class="form-group"><label>模型名称</label><input id="aiModel" class="ai-input" placeholder="gpt-4o-vision"></div>
           <div class="form-group"><label>模型密钥</label><input id="aiApiKey" class="ai-input" type="password" placeholder="sk-..."></div>
-          <div style="margin-top:12px"><button class="btn btn-primary" onclick="saveAiConfig()">💾 保存设置</button><span id="aiConfigStatus" class="text-secondary" style="margin-left:10px;font-size:13px"></span></div>
         </div>
+        <div class="card">
+          <div class="card-title">📄 文件识别提示词</div>
+          <div id="aiPromptsContainer"></div>
+        </div>
+        <div style="margin-bottom:16px"><button class="btn btn-primary" onclick="saveAiConfig()">💾 保存设置</button><span id="aiConfigStatus" class="text-secondary" style="margin-left:10px;font-size:13px"></span></div>
       </div>
     </div>
   </div>
@@ -177,22 +187,43 @@ function loadAiSettings(){
     document.getElementById('aiModel').value=c.model||''
     document.getElementById('aiApiKey').value=c.apiKey||''
     document.getElementById('aiConfigStatus').textContent=''
+    // Render prompts
+    const container=document.getElementById('aiPromptsContainer')
+    const prompts=c.prompts||{}
+    const entries=Object.keys(prompts).length?Object.entries(prompts):[['营业执照（副本）','']]
+    container.innerHTML=entries.map(([name,prompt],i)=>`
+      <div class="prompt-entry">
+        <div class="prompt-header">
+          <span class="prompt-name">${name}</span>
+        </div>
+        <textarea class="prompt-textarea" data-key="${name}" rows="5">${escHtml(prompt)}</textarea>
+      </div>
+    `).join('')
   }).catch(()=>{document.getElementById('aiConfigStatus').textContent='加载失败';document.getElementById('aiConfigStatus').style.color='var(--danger)'})
 }
 
 function saveAiConfig(){
   const body={baseUrl:document.getElementById('aiBaseUrl').value.trim(),model:document.getElementById('aiModel').value.trim(),apiKey:document.getElementById('aiApiKey').value.trim()}
   if(!body.baseUrl||!body.model){document.getElementById('aiConfigStatus').textContent='模型链接和名称为必填';document.getElementById('aiConfigStatus').style.color='var(--danger)';return}
+  // Collect prompts
+  const prompts={}
+  document.querySelectorAll('.prompt-textarea').forEach(ta=>{
+    const key=ta.dataset.key
+    if(key)prompts[key]=ta.value
+  })
+  body.prompts=prompts
   document.getElementById('aiConfigStatus').textContent='保存中...'
   api('PUT','/ai/config',body).then(()=>{
     document.getElementById('aiConfigStatus').textContent='✅ 已保存'
     document.getElementById('aiConfigStatus').style.color='var(--success)'
-    toast('模型设置已更新')
+    toast('识别设置已更新')
   }).catch(e=>{
     document.getElementById('aiConfigStatus').textContent=e.message||'保存失败'
     document.getElementById('aiConfigStatus').style.color='var(--danger)'
   })
 }
+
+function escHtml(s){const d=document.createElement('div');d.textContent=s||'';return d.innerHTML}
 </script>
 </body>
 </html>

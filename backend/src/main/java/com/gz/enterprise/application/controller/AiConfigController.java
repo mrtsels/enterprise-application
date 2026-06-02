@@ -17,13 +17,14 @@ public class AiConfigController {
     private final AiConfigStore aiConfigStore;
 
     @GetMapping("/config")
-    public Map<String, String> getConfig() {
-        return aiConfigStore.toMap();
+    public Map<String, Object> getConfig() {
+        return aiConfigStore.toFullMap();
     }
 
+    @SuppressWarnings("unchecked")
     @PutMapping("/config")
-    public Map<String, String> updateConfig(@RequestBody Map<String, String> body) {
+    public Map<String, Object> updateConfig(@RequestBody Map<String, Object> body) {
         aiConfigStore.update(body);
-        return aiConfigStore.toMap();
+        return aiConfigStore.toFullMap();
     }
 }

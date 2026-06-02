@@ -52,7 +52,7 @@ public class OcrService {
      * @param materialId    declaration material record ID
      * @return extracted fields as Map
      */
-    public Map<String, Object> recognize(MultipartFile file, Long declarationId, Long materialId, Long enterpriseId) {
+    public Map<String, Object> recognize(MultipartFile file, Long declarationId, Long materialId, Long enterpriseId, String materialName) {
         // === Validate file ===
         if (file.isEmpty()) {
             throw new IllegalArgumentException("文件为空");
@@ -74,7 +74,8 @@ public class OcrService {
         }
 
         // === Build OpenAI-compatible request ===
-        Map<String, Object> requestBody = buildRequestBody(base64Image, mediaType);
+        String systemPrompt = aiConfigStore.getPrompt(materialName);
+        Map<String, Object> requestBody = buildRequestBody(base64Image, mediaType, systemPrompt);
 
         // === Call DeepSeek API ===
         String responseBody;
@@ -111,21 +112,8 @@ public class OcrService {
     }
 
     @SuppressWarnings("unchecked")
-    private Map<String, Object> buildRequestBody(String base64Image, String mediaType) {
+    private Map<String, Object> buildRequestBody(String base64Image, String mediaType, String systemPrompt) {
         String dataUrl = "data:" + mediaType + ";base64," + base64Image;
-
-        String systemPrompt = String.join("\n",
-                "你是一个专业的中国营业执照OCR识别系统。",
-                "从图片中提取字段并以严格的JSON格式返回。",
-                "只输出一个纯JSON对象，不要任何markdown、代码块标记或额外文字。",
-                "JSON字段名必须使用以下驼峰命名：",
-                "companyName, creditCode, legalRepresentative, registeredCapital,",
-                "capitalAmount, capitalUnit, establishedDate, fullAddress,",
-                "province, city, district, businessScope, registrationAuthority, validPeriod",
-                "establishedDate格式为YYYY-MM-DD。",
-                "capitalAmount是纯数字，capitalUnit是人民币单位（如 万元）。",
-                "如果字段在图片中不可见或不清晰，设置为null。",
-                "province/city/district从fullAddress中解析提取。");
 
         return Map.of(
                 "model", aiConfigStore.getModel(),
