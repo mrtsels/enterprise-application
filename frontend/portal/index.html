@@ -30,13 +30,6 @@ body{background:#f0f2f5;color:#262626;min-height:100vh}
 .btn-sm{padding:4px 10px;font-size:12px}
 .btn-lg{padding:10px 24px;font-size:15px}.btn-block{width:100%;justify-content:center}
 
-/* Navigation tab bar */
-.tab-bar{display:flex;gap:0;margin-bottom:16px;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
-.tab-bar button{flex:1;padding:11px 16px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;position:relative;text-align:center}
-.tab-bar button:hover{background:#f0f5ff;color:var(--primary)}
-.tab-bar button.active{background:#fff;color:var(--primary);font-weight:600}
-.tab-bar button.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
-
 /* Table */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
@@ -97,16 +90,16 @@ tr:hover td{background:#f0f5ff}
 
 /* Quick action buttons */
 .qactions{display:flex;gap:10px;flex-wrap:wrap}
-.qactions .qa-btn{flex:1;min-width:140px;padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;text-align:center;transition:all .15s}
+.qactions .qa-btn{flex:1;min-width:120px;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;text-align:center;transition:all .15s}
 .qactions .qa-btn:hover{border-color:var(--primary);background:#f0f5ff;transform:translateY(-1px)}
-.qactions .qa-btn .qa-icon{font-size:24px;margin-bottom:6px}
+.qactions .qa-btn .qa-icon{font-size:20px;margin-bottom:4px}
 .qactions .qa-btn .qa-label{font-size:13px;font-weight:500;color:#262626}
 .qactions .qa-btn .qa-desc{font-size:11px;color:var(--text2);margin-top:2px}
 
 /* Empty state */
 .empty-state{padding:24px;text-align:center;color:var(--text2);font-size:14px}
 
-@media(max-width:768px){.toolbar{flex-direction:column}.toolbar .search-group{width:100%}.stats{grid-template-columns:repeat(2,1fr)}.modal{min-width:auto}}
+@media(max-width:768px){.search-group{flex-direction:column}.toolbar .search-group{width:100%}.stats{grid-template-columns:repeat(2,1fr)}.modal{min-width:auto}}
 </style>
 </head>
 <body>
@@ -120,71 +113,55 @@ tr:hover td{background:#f0f5ff}
 </div>
 
 <div class="container" id="appContainer" style="display:none">
-  <!-- Tab Nav -->
-  <div class="tab-bar">
-    <button class="active" data-page="dashboard">📊 总览</button>
-    <button data-page="list">📑 我的申报 <span id="declCount" class="tag tag-gray">0</span></button>
-    <button data-page="materials">📎 材料库</button>
-  </div>
+  <!-- Stats Row -->
+  <div class="stats" id="dashStats"></div>
 
-  <!-- ====== Dashboard ====== -->
-  <div class="page active" id="page-dashboard">
-    <div class="stats" id="dashStats"></div>
-    <div class="card">
-      <div class="card-title">✏️ 快捷操作</div>
-      <div class="qactions">
-        <div class="qa-btn" onclick="openForm('new')">
-          <div class="qa-icon">📋</div>
-          <div class="qa-label">新建预申报</div>
-          <div class="qa-desc">填写完整申报书</div>
-        </div>
-        <div class="qa-btn" onclick="switchPage('list')">
-          <div class="qa-icon">📂</div>
-          <div class="qa-label">我的申报</div>
-          <div class="qa-desc">查看/编辑已有申报</div>
-        </div>
-        <div class="qa-btn" onclick="switchPage('materials')">
-          <div class="qa-icon">📎</div>
-          <div class="qa-label">材料库</div>
-          <div class="qa-desc">管理上传的证明文件</div>
-        </div>
+  <!-- Quick Actions -->
+  <div class="card">
+    <div class="card-title">✏️ 快捷操作</div>
+    <div class="qactions">
+      <div class="qa-btn" onclick="openForm('new')">
+        <div class="qa-icon">📋</div>
+        <div class="qa-label">新建预申报</div>
+        <div class="qa-desc">填写完整申报书</div>
+      </div>
+      <div class="qa-btn" onclick="const f=document.querySelector('#listContent table tbody tr');if(f){const id=f.dataset.id;if(id)openForm('edit',id);}else toast('没有可编辑的申报','error')">
+        <div class="qa-icon">📂</div>
+        <div class="qa-label">继续编辑</div>
+        <div class="qa-desc">编辑最近一条草稿</div>
       </div>
     </div>
   </div>
 
-  <!-- ====== Declaration List ====== -->
-  <div class="page" id="page-list">
-    <div class="card">
-      <div class="card-title">
-        <span>📑 申报记录</span>
-        <button class="btn btn-primary btn-sm" onclick="openForm('new')">＋ 新建</button>
-      </div>
-      <div class="toolbar mb-2">
-        <div class="search-group">
-          <input id="searchInput" placeholder="搜索企业..." oninput="loadList()">
-          <select id="statusFilter" onchange="loadList()">
-            <option value="">全部状态</option>
-            <option value="DRAFT">草稿</option>
-            <option value="PENDING">待审核</option>
-            <option value="APPROVED">已通过</option>
-            <option value="REJECTED">已驳回</option>
-          </select>
-        </div>
-        <span id="listMeta" class="text-secondary" style="font-size:12px"></span>
-      </div>
-      <div id="listContent"><div class="empty-state">加载中...</div></div>
+  <!-- Declaration List -->
+  <div class="card">
+    <div class="card-title">
+      <span>📑 申报记录</span>
+      <button class="btn btn-primary btn-sm" onclick="openForm('new')">＋ 新建</button>
     </div>
+    <div class="toolbar mb-2">
+      <div class="search-group">
+        <input id="searchInput" placeholder="搜索..." oninput="loadList()">
+        <select id="statusFilter" onchange="loadList()">
+          <option value="">全部状态</option>
+          <option value="DRAFT">草稿</option>
+          <option value="PENDING">待审核</option>
+          <option value="APPROVED">已通过</option>
+          <option value="REJECTED">已驳回</option>
+        </select>
+      </div>
+      <span id="listMeta" class="text-secondary" style="font-size:12px"></span>
+    </div>
+    <div id="listContent"><div class="empty-state">加载中...</div></div>
   </div>
 
-  <!-- ====== Materials ====== -->
-  <div class="page" id="page-materials">
-    <div class="card">
-      <div class="card-title">
-        <span>📎 材料库</span>
-        <span class="text-secondary" style="font-size:12px;font-weight:400">已上传的证明文件</span>
-      </div>
-      <div id="materialContent"><div class="empty-state">暂无材料</div></div>
+  <!-- Materials -->
+  <div class="card">
+    <div class="card-title">
+      <span>📎 材料库</span>
+      <span class="text-secondary" style="font-size:12px;font-weight:400">已上传的证明文件</span>
     </div>
+    <div id="materialContent"><div class="empty-state">暂无材料</div></div>
   </div>
 </div>
 
@@ -210,13 +187,6 @@ function toast(m,t='success'){const e=document.getElementById('toast');e.textCon
 
 function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):undefined}).then(r=>r.ok?r.json().catch(()=>({})):r.json().then(e=>{throw new Error(e.message||'请求失败')}))}
 
-function switchPage(page){
-  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.toggle('active',b.dataset.page===page))
-  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page))
-  if(page==='dashboard')loadDash(); if(page==='list')loadList(); if(page==='materials')loadMaterials()
-}
-document.querySelectorAll('.tab-bar button').forEach(b=>b.onclick=()=>switchPage(b.dataset.page))
-
 // ===== Login =====
 function login(){
   const u=document.getElementById('loginUser').value.trim()
@@ -231,6 +201,8 @@ function login(){
     document.getElementById('appContainer').style.display='block'
     document.getElementById('headerName').textContent=ent.name
     loadDash()
+    loadList()
+    loadMaterials()
   }).catch(e=>{document.getElementById('loginErr').textContent=e.message||'登录失败'})
 }
 
@@ -246,7 +218,7 @@ function openForm(mode, declId){
   const p = new URLSearchParams({enterpriseId:ent.id, mode:mode||'new'})
   if(declId) p.set('declarationId', declId)
   formWin = window.open('http://localhost:3001/?'+p.toString(), 'declForm', 'width=1200,height=800,scrollbars=yes')
-  const check = setInterval(()=>{ if(formWin && formWin.closed){ clearInterval(check); loadList(); loadDash() } }, 1000)
+  const check = setInterval(()=>{ if(formWin && formWin.closed){ clearInterval(check); loadList(); loadDash(); loadMaterials() } }, 1000)
 }
 
 // ===== Dashboard =====
@@ -254,9 +226,6 @@ function loadDash(){
   api('GET','/declarations/stats').then(s=>{
     const items=[{k:'total',l:'总申报',c:'#1677ff'},{k:'draft',l:'草稿',c:'#999'},{k:'pending',l:'待审核',c:'#d48806'},{k:'approved',l:'已通过',c:'#52c41a'},{k:'rejected',l:'已驳回',c:'#cf1322'}]
     document.getElementById('dashStats').innerHTML=items.map(i=>`<div class="stat-card"><div class="num" style="color:${i.c}">${s[i.k]||0}</div><div class="lbl">${i.l}</div></div>`).join('')
-  }).catch(()=>{})
-  if(ent)api('GET','/declarations/enterprise/'+ent.id).then(list=>{
-    document.getElementById('declCount').textContent=list.length
   }).catch(()=>{})
 }
 
@@ -268,7 +237,7 @@ function loadList(){
     document.getElementById('listMeta').textContent = items.length+' 条记录'
     if(!items.length){el.innerHTML='<div class="empty-state">暂无匹配的申报记录</div>';return}
     el.innerHTML='<div class="table-wrap"><table><thead><tr><th>编号</th><th>类型</th><th>年度</th><th>营收</th><th>研发投入</th><th>评分</th><th>材料</th><th>状态</th><th style="min-width:110px">操作</th></tr></thead><tbody>'+
-      items.map(d=>`<tr>
+      items.map(d=>`<tr data-id="${d.id}">
         <td style="font-size:12px">${d.declarationCode||'<span class="text-secondary">-</span>'}</td>
         <td><span class="tag tag-blue">${{XIAOJUREN:'小巨人',PROVINCIAL:'省级',INNOVATIVE:'创新型'}[d.type]||d.type}</span></td>
         <td>${d.year||'-'}</td>
