@@ -4,12 +4,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "ai.deepseek")
+@ConfigurationProperties(prefix = "ai.vision")
 public class DeepSeekProperties {
 
     private String apiKey = "sk-placeholder";
-    private String baseUrl = "https://api.deepseek.com";
-    private String model = "deepseek-chat";
+    private String baseUrl = "http://localhost:8000";
+    private String model = "gpt-4o-vision";
     private int maxTokens = 4096;
 
     public String getApiKey() { return apiKey; }

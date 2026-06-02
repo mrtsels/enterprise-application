@@ -33,10 +33,10 @@ spring:
       max-request-size: 10MB
 
 ai:
-  deepseek:
-    api-key: ${DEEPSEEK_API_KEY:sk-placeholder}
-    base-url: https://api.deepseek.com
-    model: deepseek-chat
+  vision:
+    api-key: ${AI_VISION_KEY:sk-placeholder}
+    base-url: ${AI_VISION_URL:http://localhost:8000}
+    model: ${AI_VISION_MODEL:gpt-4o-vision}
     max-tokens: 4096
 
 app:

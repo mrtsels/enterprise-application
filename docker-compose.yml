@@ -29,7 +29,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/enterprise_mvp?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
       SPRING_DATASOURCE_USERNAME: enterprise
       SPRING_DATASOURCE_PASSWORD: enterprise123
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY}
+      AI_VISION_KEY: ${AI_VISION_KEY}
+      AI_VISION_URL: ${AI_VISION_URL:-http://localhost:8000}
+      AI_VISION_MODEL: ${AI_VISION_MODEL:-gpt-4o-vision}
       UPLOAD_PATH: /app/uploads
       TZ: Asia/Shanghai
     ports:
