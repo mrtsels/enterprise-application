@@ -37,9 +37,14 @@ public class OcrService {
     private RestClient aiClient() {
         String baseUrl = aiConfigStore.getBaseUrl();
         String apiKey = aiConfigStore.getApiKey();
+        // Simple redirect-following: if baseUrl is http, try https
+        String effectiveUrl = baseUrl;
+        if (effectiveUrl.startsWith("http://")) {
+            effectiveUrl = "https://" + effectiveUrl.substring(8);
+        }
         return restClientBuilder
-                .baseUrl(baseUrl)
-                .defaultHeader("Authorization", "Bearer " + apiKey)
+                .baseUrl(effectiveUrl)
+                .defaultHeader("api-key", apiKey)
                 .defaultHeader("Content-Type", "application/json")
                 .build();
     }
