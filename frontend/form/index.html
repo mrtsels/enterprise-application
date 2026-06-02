@@ -58,7 +58,7 @@ body{background:#f0f2f5;color:#262626}
   <div><h1>✏️ 专精特新"小巨人"预申报书</h1><div class="sub">按工信部标准表单在线填报</div></div>
   <div class="header-right">
     <span id="headerName" style="font-size:13px"></span>
-    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="window.close()">关闭</button>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="location.href='http://localhost:3000'">关闭</button>
   </div>
 </div>
 
@@ -447,7 +447,7 @@ function submitDecl(){
     if(!curId){toast('请先保存草稿','error');return}
     api('POST','/declarations/'+curId+'/submit').then(d=>{
       toast('✅ 预申报已提交！')
-      showModal('<h3>📨 提交成功</h3><div style="margin:12px 0"><div style="padding:10px;background:#f6ffed;border-radius:6px">申报编号：<strong>'+d.declarationCode+'</strong><br>AI 评估总分：<strong style="color:'+((d.totalScore||0)>=70?'#52c41a':'#d48806')+'">'+(d.totalScore||0)+'</strong> / 100</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:13px;text-align:center"><div>专业化<br><strong>'+(d.professionalScore||0)+'</strong>/25</div><div>精细化<br><strong>'+(d.refinedScore||0)+'</strong>/25</div><div>特色化<br><strong>'+(d.featureScore||0)+'</strong>/15</div><div>创新力<br><strong>'+(d.innovationScoreDetail||0)+'</strong>/35</div></div></div><div style="text-align:right;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="closeModal();window.close()">关闭并返回门户</button></div>')
+      showModal('<h3>📨 提交成功</h3><div style="margin:12px 0"><div style="padding:10px;background:#f6ffed;border-radius:6px">申报编号：<strong>'+d.declarationCode+'</strong><br>AI 评估总分：<strong style="color:'+((d.totalScore||0)>=70?'#52c41a':'#d48806')+'">'+(d.totalScore||0)+'</strong> / 100</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:13px;text-align:center"><div>专业化<br><strong>'+(d.professionalScore||0)+'</strong>/25</div><div>精细化<br><strong>'+(d.refinedScore||0)+'</strong>/25</div><div>特色化<br><strong>'+(d.featureScore||0)+'</strong>/15</div><div>创新力<br><strong>'+(d.innovationScoreDetail||0)+'</strong>/35</div></div></div><div style="text-align:right;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="closeModal();location.href='http://localhost:3000'">关闭并返回门户</button></div>')
       curId=null
     }).catch(e=>toast(e.message||'提交失败','error'))
   },500)
