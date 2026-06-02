@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>申报填表 - 专精特新"小巨人"预申报</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body{background:#f0f2f5;color:#262626}
+:root{--primary:#1677ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;--bg:#f0f2f5;--card:#fff;--text2:#8c8c8c;--border:#e8e8e8;--radius:8px}
+.header{background:linear-gradient(135deg,#1677ff,#0958d9);color:#fff;padding:12px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:16px;font-weight:600}.header .sub{font-size:11px;opacity:.75}
+.header-right{display:flex;align-items:center;gap:10px}
+.container{max-width:960px;margin:0 auto;padding:12px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--primary)}
+.sec-nav{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:12px;background:var(--card);border-radius:var(--radius);padding:6px;border:1px solid var(--border)}
+.sec-nav button{padding:6px 14px;border:none;background:transparent;cursor:pointer;font-size:12px;font-weight:500;color:var(--text2);border-radius:6px;transition:all .2s}
+.sec-nav button:hover{background:#f0f5ff;color:var(--primary)}
+.sec-nav button.active{background:var(--primary);color:#fff}
+.sec-pane{display:none}.sec-pane.active{display:block}
+.sec-title{font-size:14px;font-weight:600;margin:16px 0 8px;padding:6px 10px;background:#f0f5ff;border-left:3px solid var(--primary)}
+.sec-sub{font-size:13px;font-weight:600;margin:12px 0 6px;color:var(--text2)}
+.form-row{display:flex;gap:10px;margin-bottom:8px;align-items:flex-start;flex-wrap:wrap}
+.form-row>label{font-size:13px;color:#262626;min-width:130px;padding-top:6px;flex-shrink:0}
+.form-row>label .req{color:var(--danger)}
+.form-row>input,.form-row>select,.form-row>textarea{padding:6px 8px;border:1px solid var(--border);border-radius:5px;font-size:13px;outline:none;background:#fff}
+.form-row>input:focus,.form-row>select:focus,.form-row>textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(22,119,255,.1)}
+.form-row>input,.form-row>select{flex:1;min-width:180px}.form-row>textarea{flex:1;min-width:180px;resize:vertical;min-height:50px}
+.form-row .note{font-size:12px;color:var(--text2);padding-top:7px}
+.opt-row{margin-bottom:6px;padding-left:140px}
+.opt-row .og{display:flex;flex-wrap:wrap;gap:8px}
+.opt-row label,.opt-row .og label{font-size:13px;display:inline-flex;align-items:center;gap:4px;cursor:pointer}
+.sub-table{width:100%;border-collapse:collapse;font-size:12px;margin:6px 0 12px}
+.sub-table th,.sub-table td{padding:6px 8px;text-align:left;border:1px solid var(--border)}
+.sub-table th{background:#fafafa;font-weight:600;color:var(--text2);font-size:11px;text-align:center}
+.sub-table td input,.sub-table td select{width:100%;padding:4px 5px;border:1px solid var(--border);border-radius:4px;font-size:12px;outline:none}
+.sub-table td input:focus,.sub-table td select:focus{border-color:var(--primary)}
+.sub-table td{text-align:center}.sub-table td:first-child{text-align:left;font-weight:500}
+.btn{padding:7px 16px;border-radius:6px;border:1px solid var(--border);font-size:13px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{background:#4096ff}
+.btn-success{background:var(--success);color:#fff;border-color:var(--success)}
+.btn-danger{background:#fff;color:var(--danger);border-color:var(--danger)}
+.btn-outline{background:#fff;color:var(--text2)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.bottom-bar{position:sticky;bottom:0;background:var(--card);border-radius:0;padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:10px;justify-content:flex-end;align-items:center}
+.toast{position:fixed;top:20px;right:20px;padding:10px 18px;border-radius:8px;color:#fff;font-size:13px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}.toast-success{background:var(--success)}.toast-error{background:var(--danger)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;min-width:380px;max-width:90vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:15px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+@media(max-width:768px){.form-row{flex-direction:column}.form-row>label{min-width:auto}.opt-row{padding-left:0}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div><h1>✏️ 专精特新"小巨人"预申报书</h1><div class="sub">按工信部标准表单在线填报</div></div>
+  <div class="header-right">
+    <span id="headerName" style="font-size:13px"></span>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="window.close()">关闭</button>
+  </div>
+</div>
+
+<div class="container" id="app">
+  <div class="sec-nav" id="secNav">
+    <button class="active" data-sec="1">一、基本情况</button>
+    <button data-sec="2">二、经济效益</button>
+    <button data-sec="3">三、专业化</button>
+    <button data-sec="4">四、精细化</button>
+    <button data-sec="5">五、特色化</button>
+    <button data-sec="6">六、创新能力</button>
+    <button data-sec="7">七、产业链配套</button>
+    <button data-sec="8">八、主导产品领域</button>
+    <button data-sec="9">九、其他</button>
+  </div>
+
+  <div id="formContent"></div>
+
+  <div class="bottom-bar">
+    <span id="formStatus" style="font-size:12px;color:var(--text2);flex:1"></span>
+    <button class="btn btn-outline btn-sm" onclick="resetForm()">🔄 重置</button>
+    <button class="btn btn-primary btn-sm" onclick="saveDraft()">💾 保存草稿</button>
+    <button class="btn btn-success btn-sm" onclick="submitDecl()">📨 提交预申报</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal"><div class="modal" id="modalContent"></div></div>
+
+<script>
+// ===== Read params from portal =====
+const params = new URLSearchParams(location.search)
+const API='http://localhost:8080/api'
+let enterpriseId = parseInt(params.get('enterpriseId')) || null
+let declarationId = params.get('declarationId') ? parseInt(params.get('declarationId')) : null
+let mode = params.get('mode') || 'new'
+let ent = null
+let curId = declarationId || null
+
+// City data
+const cities={'广东省':['广州市','深圳市','珠海市','汕头市','佛山市','韶关市','湛江市','肇庆市','江门市','茂名市','惠州市','梅州市','汕尾市','河阳江市','清远市','东莞市','中山市','潮州市','揭阳市','云浮市'],'浙江省':['杭州市','宁波市','温州市','嘉兴市','湖州市','绍兴市','金华市','衢州市','舟山市','台州市','丽水市'],'江苏省':['南京市','无锡市','徐州市','常州市','苏州市','南通市','连云港市','淮安市','盐城市','扬州市','镇江市','泰州市','宿迁市'],'北京市':['东城区','西城区','朝阳区','海淀区','丰台区','石景山区','通州区','大兴区','顺义区','昌平区'],'上海市':['黄浦区','徐汇区','长宁区','静安区','普陀区','虹口区','杨浦区','浦东新区','闵行区','宝山区','嘉定区']}
+const dists={'广州市':['荔湾区','越秀区','海珠区','天河区','白云区','黄埔区','番禺区','花都区','南沙区','从化区','增城区'],'深圳市':['罗湖区','福田区','南山区','宝安区','龙岗区','盐田区','龙华区','坪山区','光明区'],'杭州市':['上城区','拱墅区','西湖区','滨江区','萧山区','余杭区','临平区','钱塘区','富阳区','临安区'],'北京市':['东城区','西城区','朝阳区','海淀区','丰台区','石景山区','通州区','大兴区','顺义区','昌平区'],'上海市':['黄浦区','徐汇区','长宁区','静安区','普陀区','虹口区','杨浦区','浦东新区','闵行区','宝山区','嘉定区']}
+
+function updCity(){const p=$('f_province'),c=$('f_city');c.innerHTML='<option value="">— 市(区) —</option>';if(cities[p.value])cities[p.value].forEach(v=>{c.innerHTML+='<option value="'+v+'">'+v+'</option>'});updDist()}
+function updDist(){const c=$('f_city'),d=$('f_district');d.innerHTML='<option value="">— 县(区) —</option>';if(dists[c.value])dists[c.value].forEach(v=>{d.innerHTML+='<option value="'+v+'">'+v+'</option>'})}
+function toggleListed(){const v=document.querySelector('input[name="f_listed"]:checked');($('listingPlan')).style.display=v&&v.value==='plan'?'block':'none';($('f_stockCode')).disabled=!v||v.value!=='listed'}
+
+function $(id){return document.getElementById(id)}
+function toast(m,t){const e=$('toast');e.textContent=m;e.className='toast toast-'+(t||'success')+' show';setTimeout(()=>e.classList.remove('show'),2500)}
+function showModal(h){$('modalContent').innerHTML=h;$('modal').classList.add('show')}
+function closeModal(){$('modal').classList.remove('show')}
+$('modal').onclick=e=>{if(e.target===e.currentTarget)closeModal()}
+
+function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):undefined}).then(r=>r.ok?r.json().catch(()=>({})):r.json().then(e=>{throw new Error(e.message||'请求失败')}))}
+
+// ===== Init =====
+async function init(){
+  // Load enterprise
+  if(enterpriseId){
+    try{ent=await api('GET','/enterprises/'+enterpriseId);$('headerName').textContent=ent.name}catch(e){}
+  }
+  renderForm()
+  // Load existing declaration
+  if(curId){
+    try{
+      const d=await api('GET','/declarations/'+curId)
+      $('formStatus').textContent='📝 编辑申报 #'+curId
+      if(d.revenue&&$('f_rev25'))$('f_rev25').value=d.revenue
+      if(d.rdInvestment&&$('f_rdInv25'))$('f_rdInv25').value=d.rdInvestment
+      if(d.rdRatio&&$('f_rdRatio25'))$('f_rdRatio25').value=d.rdRatio
+      if(d.marketYears&&$('f_marketYears'))$('f_marketYears').value=d.marketYears
+      if(d.productName&&$('f_productName'))$('f_productName').value=d.productName
+      if(d.mainRevenueRatio&&$('f_mainRevRatio'))$('f_mainRevRatio').value=d.mainRevenueRatio
+      if(d.revenueGrowth2yAvg&&$('f_revGrowth2y'))$('f_revGrowth2y').value=d.revenueGrowth2yAvg
+      if(d.debtRatio&&$('f_debt25'))$('f_debt25').value=d.debtRatio
+      if(d.netProfit&&$('f_netP25'))$('f_netP25').value=d.netProfit
+      if(d.revenue&&$('f_rev25'))$('f_rev25').value=d.revenue
+    }catch(e){toast('加载申报数据失败','error')}
+  }else{
+    $('formStatus').textContent='📝 新建预申报'
+  }
+}
+
+// ===== Render sections =====
+function renderForm(){
+  $('formContent').innerHTML = `
+<div class="card sec-pane active" id="sec-1">
+<div class="card-title">一、企业基本情况</div>
+<div class="form-row"><label>企业名称 <span class="req">*</span></label><input id="f_name" value="${ent?ent.name:'广州测试科技有限公司'}"></div>
+<div class="form-row"><label>统一社会信用代码</label><input id="f_creditCode" value="91440101MA5XXXXXXX"></div>
+<div class="sec-sub">企业注册地</div>
+<div class="form-row"><label>注册地</label>
+<select id="f_province" style="flex:0.4;min-width:110px" onchange="updCity()"><option value="">—省—</option><option value="北京市">北京市</option><option value="天津市">天津市</option><option value="上海市">上海市</option><option value="广东省" selected>广东省</option><option value="浙江省">浙江省</option><option value="江苏省">江苏省</option><option value="福建省">福建省</option><option value="山东省">山东省</option><option value="四川省">四川省</option></select>
+<select id="f_city" style="flex:0.4;min-width:110px" onchange="updDist()"><option value="">—市(区)—</option><option value="广州市" selected>广州市</option></select>
+<select id="f_district" style="flex:0.4;min-width:110px"><option value="">—县(区)—</option><option value="海珠区" selected>海珠区</option></select></div>
+<div class="form-row"><label>通讯地址</label><input id="f_address" value="广州市海珠区新港中路123号"></div>
+<div class="form-row"><label>邮编</label><input id="f_zip" value="510310" style="max-width:130px"></div>
+<div class="form-row"><label>法定代表人</label><input id="f_legalRep" value="张三"></div>
+<div class="form-row"><label>控股股东</label><input id="f_controller" value="广州测试控股集团"></div>
+<div class="form-row"><label>实际控制人</label><input id="f_actualCtrl" value="李四"></div>
+<div class="form-row"><label>实际控制人国籍</label><input id="f_ctrlNation" value="中国"></div>
+<div class="form-row"><label>联系人</label><input id="f_contact" value="王五"></div>
+<div class="form-row"><label>电话</label><input id="f_tel" value="020-88886666" style="max-width:180px"></div>
+<div class="form-row"><label>手机</label><input id="f_mobile" value="13800138000" style="max-width:180px"></div>
+<div class="form-row"><label>传真</label><input id="f_fax" value="020-88886667" style="max-width:180px"></div>
+<div class="form-row"><label>E-mail</label><input id="f_email" type="email" value="contact@test-tech.com"></div>
+<div class="form-row"><label>注册时间</label><input id="f_estDate" type="date" value="2015-06-15" style="max-width:170px"></div>
+<div class="form-row"><label>注册资本（万元）</label><input id="f_regCapital" type="number" value="5000" style="max-width:150px"></div>
+<div class="sec-sub">企业规模</div>
+<div class="form-row"><label>根据《中小企业划型标准规定》</label>
+<div class="inline-group" style="display:flex;gap:8px;align-items:center">
+<label><input type="radio" name="f_scale" value="大型"> 大型</label>
+<label><input type="radio" name="f_scale" value="中型" checked> 中型</label>
+<label><input type="radio" name="f_scale" value="小型"> 小型</label>
+<label><input type="radio" name="f_scale" value="微型"> 微型</label></div></div>
+<div class="sec-sub">所属行业</div>
+<div class="form-row"><label>2位数代码及名称</label>
+<select id="f_indCode" style="max-width:90px"><option value="">代码</option><option value="C">C</option><option value="I" selected>I</option><option value="M">M</option></select>
+<select id="f_indName" style="flex:1"><option value="制造业">制造业</option><option value="软件和信息技术服务业" selected>软件和信息技术服务业</option><option value="生物医药">生物医药</option></select></div>
+<div class="form-row"><label>具体细分领域<br><span style="font-size:11px;color:var(--text2)">4位数代码及名称</span></label>
+<input id="f_detailCode" value="I6513" style="max-width:80px" placeholder="代码">
+<input id="f_detailName" value="应用软件开发" style="flex:1" placeholder="名称"></div>
+<div class="sec-sub">企业类型</div>
+<div class="form-row"><label>企业类型</label>
+<div class="inline-group" style="display:flex;gap:8px;align-items:center">
+<label><input type="radio" name="f_entType" value="国有"> 国有</label>
+<label><input type="radio" name="f_entType" value="合资"> 合资</label>
+<label><input type="radio" name="f_entType" value="民营" checked> 民营</label>
+<label><input type="radio" name="f_entType" value="外资"> 外资</label></div></div>
+<div class="sec-sub">控股关系</div>
+<div class="opt-row"><label>是否与现有"小巨人"企业存在控股关系</label><div class="og">
+<label><input type="radio" name="f_hasGiant" value="false" checked onchange="$('f_giantName').disabled=true"> 否</label>
+<label><input type="radio" name="f_hasGiant" value="true" onchange="$('f_giantName').disabled=false"> 是，名称：<input id="f_giantName" style="width:180px;padding:3px 6px;border:1px solid var(--border);border-radius:4px" disabled></label></div></div>
+<div class="opt-row"><label>同集团内是否有其他相似产品企业</label><div class="og">
+<label><input type="radio" name="f_hasGroup" value="false" checked onchange="$('f_groupName').disabled=true"> 否</label>
+<label><input type="radio" name="f_hasGroup" value="true" onchange="$('f_groupName').disabled=false"> 是，名称：<input id="f_groupName" style="width:180px;padding:3px 6px;border:1px solid var(--border);border-radius:4px" disabled></label></div></div>
+<div class="sec-sub">上市情况</div>
+<div class="opt-row"><div class="og">
+<label><input type="radio" name="f_listed" value="none" checked onchange="toggleListed()"> 无上市计划</label>
+<label><input type="radio" name="f_listed" value="plan" onchange="toggleListed()"> 有上市计划</label>
+<label><input type="radio" name="f_listed" value="listed" onchange="toggleListed()"> 已上市（代码：<input id="f_stockCode" style="width:100px;padding:3px 6px;border:1px solid var(--border);border-radius:4px" disabled>)</label></div></div>
+<div id="listingPlan" style="display:none">
+<div class="form-row"><label>上市进程</label><div class="inline-group" style="display:flex;gap:8px;align-items:center">
+<label><input type="radio" name="f_listingProc" value="未股改"> 未上市前股改</label>
+<label><input type="radio" name="f_listingProc" value="已股改"> 已完成股改</label>
+<label><input type="radio" name="f_listingProc" value="已提交"> 已提交上市申请</label></div></div>
+<div class="form-row"><label>拟上市地</label><div class="inline-group" style="display:flex;gap:8px;align-items:center">
+<label><input type="radio" name="f_listingPlace" value="上交所主板"> 上交所主板</label>
+<label><input type="radio" name="f_listingPlace" value="上交所科创板"> 科创板</label>
+<label><input type="radio" name="f_listingPlace" value="深交所主板"> 深交所主板</label>
+<label><input type="radio" name="f_listingPlace" value="深交所创业板"> 创业板</label>
+<label><input type="radio" name="f_listingPlace" value="北交所"> 北交所</label>
+<label><input type="radio" name="f_listingPlace" value="境外"> 境外</label></div></div></div>
+</div>
+
+<div class="card sec-pane" id="sec-2">
+<div class="card-title">二、经济效益和经营情况</div>
+<table class="sub-table"><thead><tr><th style="min-width:130px">重要指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead><tbody>
+<tr><td>全职员工数量（人）</td><td><input id="f_emp23" type="number" value="98"></td><td><input id="f_emp24" type="number" value="120"></td><td><input id="f_emp25" type="number" value="145"></td></tr>
+<tr><td>其中：研发人员数量（人）</td><td><input id="f_rdEmp23" type="number" value="32"></td><td><input id="f_rdEmp24" type="number" value="41"></td><td><input id="f_rdEmp25" type="number" value="52"></td></tr>
+<tr><td>营业收入（万元）</td><td><input id="f_rev23" type="number" value="3800"></td><td><input id="f_rev24" type="number" value="5000"></td><td><input id="f_rev25" type="number" value="6800"></td></tr>
+<tr><td>其中：主营业务收入（万元）</td><td><input id="f_mRev23" type="number" value="3600"></td><td><input id="f_mRev24" type="number" value="4800"></td><td><input id="f_mRev25" type="number" value="6500"></td></tr>
+<tr><td>主营业务收入增长率（%）</td><td><input id="f_mRevG23" type="number" step="0.1" value="15.2"></td><td><input id="f_mRevG24" type="number" step="0.1" value="18.5"></td><td><input id="f_mRevG25" type="number" step="0.1" value="16.8"></td></tr>
+<tr><td>利润总额（万元）</td><td><input id="f_profit23" type="number" value="520"></td><td><input id="f_profit24" type="number" value="720"></td><td><input id="f_profit25" type="number" value="980"></td></tr>
+<tr><td>净利润总额（万元）</td><td><input id="f_netP23" type="number" value="440"></td><td><input id="f_netP24" type="number" value="610"></td><td><input id="f_netP25" type="number" value="830"></td></tr>
+<tr><td>净利润增长率（%）</td><td><input id="f_netPG23" type="number" step="0.1" value="12.5"></td><td><input id="f_netPG24" type="number" step="0.1" value="16.2"></td><td><input id="f_netPG25" type="number" step="0.1" value="18.1"></td></tr>
+<tr><td>营业成本（万元）</td><td><input id="f_cost23" type="number" value="2200"></td><td><input id="f_cost24" type="number" value="2900"></td><td><input id="f_cost25" type="number" value="3800"></td></tr>
+<tr><td>资产总额（万元）</td><td><input id="f_asset23" type="number" value="6200"></td><td><input id="f_asset24" type="number" value="8000"></td><td><input id="f_asset25" type="number" value="10500"></td></tr>
+<tr><td>期末净资产（万元）</td><td><input id="f_netAsset23" type="number" value="4200"></td><td><input id="f_netAsset24" type="number" value="5200"></td><td><input id="f_netAsset25" type="number" value="6800"></td></tr>
+<tr><td>负债总额（万元）</td><td><input id="f_liab23" type="number" value="2000"></td><td><input id="f_liab24" type="number" value="2800"></td><td><input id="f_liab25" type="number" value="3700"></td></tr>
+<tr><td>资产负债率（%）</td><td><input id="f_debt23" type="number" step="0.1" value="32.3"></td><td><input id="f_debt24" type="number" step="0.1" value="35.0"></td><td><input id="f_debt25" type="number" step="0.1" value="35.2"></td></tr>
+<tr><td>上缴税金（万元）</td><td><input id="f_tax23" type="number" value="280"></td><td><input id="f_tax24" type="number" value="360"></td><td><input id="f_tax25" type="number" value="480"></td></tr>
+<tr><td>股权融资总额（万元）</td><td><input id="f_eq23" type="number" value="2000"></td><td><input id="f_eq24" type="number" value="0"></td><td><input id="f_eq25" type="number" value="5000"></td></tr>
+<tr><td>银行贷款（万元）</td><td><input id="f_loan23" type="number" value="1000"></td><td><input id="f_loan24" type="number" value="1500"></td><td><input id="f_loan25" type="number" value="2000"></td></tr></tbody></table>
+<div class="sec-sub">审计与贷款</div>
+<div class="form-row"><label>审计报告编码</label><input id="f_auditCode" value="穗华财审字[2026]第0088号"></div>
+<div class="opt-row"><label>近3年是否申请银行贷款</label><div class="og"><label><input type="radio" name="f_hasLoan" value="false"> 否</label><label><input type="radio" name="f_hasLoan" value="true" checked> 是</label></div></div>
+<div class="form-row"><label>信贷满足率</label><input id="f_creditSat" type="number" step="0.1" style="max-width:100px" value="85.0"><span class="note">%（获批/申请额度）</span></div>
+<div class="opt-row"><label>贷款主要用于</label><div class="og"><label><input type="checkbox" checked> 日常生产经营</label><label><input type="checkbox" checked> 扩大生产</label><label><input type="checkbox" checked> 研发及技术改造</label><label><input type="checkbox"> 海外运营及投资并购</label></div></div>
+<div class="sec-sub">融资计划</div>
+<div class="form-row"><label>资金需求额</label><input id="f_fundReq" type="number" style="max-width:130px" value="3000"><span class="note">万元</span></div>
+<div class="opt-row"><label>计划融资方式</label><div class="og"><label><input type="checkbox" checked> 银行贷款</label><label><input type="checkbox" checked> 股权融资</label><label><input type="checkbox"> 债券融资</label><label><input type="checkbox"> 上市融资</label><label><input type="checkbox"> 其他</label></div></div>
+</div>
+
+<div class="card sec-pane" id="sec-3">
+<div class="card-title">三、专业化</div>
+<div class="form-row"><label>从事特定细分市场时间</label><input id="f_marketYears" type="number" style="max-width:90px" value="8"><span class="note">年</span></div>
+<div class="form-row"><label>主营业务收入占营业收入比重</label><input id="f_mainRevRatio" type="number" step="0.1" style="max-width:110px" value="95.6"><span class="note">%</span></div>
+<div class="form-row"><label>近2年主营业务收入平均增长率</label><input id="f_revGrowth2y" type="number" step="0.1" style="max-width:110px" value="17.6"><span class="note">%</span></div>
+<div class="sec-sub">主要产品 1</div>
+<div style="border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px">
+<div class="form-row"><label>名称</label><input id="f_p1_name" value="智能测试平台 V3.0"></div>
+<div class="form-row"><label>收入</label><input id="f_p1_rev" type="number" style="max-width:130px" value="3200"><span class="note">万元 | 日产能：</span><input id="f_p1_cap" type="number" style="max-width:80px" value="500"><select id="f_p1_unit" style="max-width:90px"><option selected>套/日</option><option>件/日</option></select></div>
+<div class="form-row"><label>运用的主要I类知识产权<br><span style="font-size:11px;color:var(--text2)">（不超过3项）</span></label>
+<input id="f_p1_ip1" value="智能测试方法及系统" style="flex:1"><input id="f_p1_ip2" value="分布式测试平台" style="flex:1"><input id="f_p1_ip3" placeholder="..." style="flex:1"></div></div>
+<div class="sec-sub">主要产品 2</div>
+<div style="border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px">
+<div class="form-row"><label>名称</label><input id="f_p2_name" value="数据中台管理系统"></div>
+<div class="form-row"><label>收入</label><input id="f_p2_rev" type="number" style="max-width:130px" value="1800"><span class="note">万元</span></div>
+<div class="form-row"><label>运用的主要I类知识产权</label><input id="f_p2_ip1" value="数据中台管理软件（软著）" style="flex:1"><input id="f_p2_ip2" placeholder="..." style="flex:1"><input id="f_p2_ip3" placeholder="..." style="flex:1"></div></div>
+<div class="sec-sub">主要产品 3 <span style="font-weight:400;color:var(--text2);font-size:12px">（选填）</span></div>
+<div style="border:1px solid var(--border);border-radius:6px;padding:12px">
+<div class="form-row"><label>名称</label><input id="f_p3_name" placeholder="产品名称"></div>
+<div class="form-row"><label>收入</label><input id="f_p3_rev" type="number" style="max-width:130px"><span class="note">万元</span></div>
+<div class="form-row"><label>运用的主要I类知识产权</label><input id="f_p3_ip1" placeholder="..." style="flex:1"><input id="f_p3_ip2" placeholder="..." style="flex:1"><input id="f_p3_ip3" placeholder="..." style="flex:1"></div></div>
+</div>
+
+<div class="card sec-pane" id="sec-4">
+<div class="card-title">四、精细化</div>
+<div class="sec-sub">管理体系认证情况（可多选）</div>
+<div class="opt-row"><div class="og">
+<label><input type="checkbox" checked> ISO9000 质量管理体系认证</label>
+<label><input type="checkbox" checked> ISO14000 环境管理体系认证</label>
+<label><input type="checkbox"> OHSAS18000 职业安全健康管理体系</label>
+<label><input type="checkbox"> 其他 <input style="width:130px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" placeholder="请说明"></label></div></div>
+<div class="sec-sub">核心业务采用信息系统支撑情况（可多选）</div>
+<div class="opt-row"><div class="og">
+<label><input type="checkbox"> 研发设计 CAX</label>
+<label><input type="checkbox"> 生产制造 CAM</label>
+<label><input type="checkbox" checked> 经营管理 ERP/OA</label>
+<label><input type="checkbox" checked> 运维服务 CRM</label>
+<label><input type="checkbox"> 供应链管理 SRM</label>
+<label><input type="checkbox"> 其他 <input style="width:100px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" placeholder="说明"></label></div></div>
+<div class="sec-sub">产品认证情况</div>
+<div class="form-row"><label>发达国家认证（多选）</label><div class="og" style="display:flex;gap:6px;flex-wrap:wrap">
+<label><input type="checkbox"> UL</label><label><input type="checkbox"> CSA</label><label><input type="checkbox"> ETL</label><label><input type="checkbox"> GS</label>
+<label><input type="checkbox"> 其他 <input style="width:80px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" placeholder="说明"></label></div></div>
+<div class="form-row"><label>国内认证（多选）</label><div class="og" style="display:flex;gap:6px;flex-wrap:wrap">
+<label><input type="checkbox"> CQC</label><label><input type="checkbox"> CAM</label><label><input type="checkbox"> CTC</label><label><input type="checkbox"> CCAP</label>
+<label><input type="checkbox"> 其他 <input style="width:80px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" placeholder="说明"></label></div></div>
+<div class="sec-sub">数字化赋能</div>
+<div class="opt-row"><label>业务系统是否向云端迁移</label><div class="og"><label><input type="radio" name="f_cloud" value="true" checked> 是</label><label><input type="radio" name="f_cloud" value="false"> 否</label></div></div>
+<div class="opt-row"><label>是否拥有制造业与互联网融合试点示范项目</label><div class="og"><label><input type="radio" name="f_internetDemo" value="true"> 是</label><label><input type="radio" name="f_internetDemo" value="false" checked> 否</label></div></div>
+<div class="sec-sub">财务指标</div>
+<div class="form-row"><label>企业资产负债率</label><input id="f_debtRatio" type="number" step="0.1" style="max-width:100px" value="35.2" readonly><span class="note">%（系统自动计算）</span></div>
+</div>
+
+<div class="card sec-pane" id="sec-5">
+<div class="card-title">五、特色化</div>
+<table class="sub-table"><thead><tr><th style="min-width:140px">指标</th><th>2024 年</th><th>2025 年</th></tr></thead><tbody>
+<tr><td>主导产品国际细分市场占有率（%）</td><td><input id="f_intl24" type="number" step="0.01" value="2.35"></td><td><input id="f_intl25" type="number" step="0.01" value="2.85"></td></tr>
+<tr><td>主导产品全国细分市场占有率（%）</td><td><input id="f_dom24" type="number" step="0.01" value="5.20"></td><td><input id="f_dom25" type="number" step="0.01" value="6.10"></td></tr>
+<tr><td>主导产品出口额（万元）</td><td><input id="f_export24" type="number" value="560"></td><td><input id="f_export25" type="number" value="820"></td></tr>
+<tr><td>企业自有品牌个数</td><td><input id="f_brand24" type="number" value="2"></td><td><input id="f_brand25" type="number" value="3"></td></tr>
+<tr><td>自有品牌销售收入（万元）</td><td><input id="f_brandRev24" type="number" value="1800"></td><td><input id="f_brandRev25" type="number" value="2800"></td></tr></tbody></table>
+<div class="sec-sub">主要出口目的地（3个以内）</div>
+<div class="form-row"><label>目的地</label><input id="f_export1" style="flex:1" value="东南亚"><input id="f_export2" style="flex:1" value="中东"><input id="f_export3" style="flex:1"></div>
+<div class="sec-sub">2025年主导产品全国细分市场占有率情况介绍</div>
+<div class="form-row"><label style="min-width:130px">情况介绍<br><span style="font-size:11px;color:var(--text2)">1000字以内</span></label>
+<textarea id="f_msDesc" rows="3" placeholder="1.界定细分市场范围。2.介绍细分市场规模。3.介绍本企业占有率情况。">公司在华南地区智能测试细分市场占有率约6.1%，位居行业前三。</textarea></div>
+</div>
+
+<div class="card sec-pane" id="sec-6">
+<div class="card-title">六、创新能力</div>
+<div class="sec-sub">研发机构建设情况</div>
+<table class="sub-table" style="font-size:11px"><thead><tr><th style="min-width:90px">机构类型</th><th>国家级</th><th>省级</th><th>自建</th></tr></thead><tbody>
+<tr><td>技术研究院</td><td><input id="f_r1n" type="number" value="0" style="max-width:60px"></td><td><input id="f_r1p" type="number" value="0" style="max-width:60px"></td><td><input id="f_r1s" type="number" value="1" style="max-width:60px"></td></tr>
+<tr><td>企业技术中心</td><td><input id="f_r2n" type="number" value="0" style="max-width:60px"></td><td><input id="f_r2p" type="number" value="1" style="max-width:60px"></td><td><input id="f_r2s" type="number" value="1" style="max-width:60px"></td></tr>
+<tr><td>企业工程中心</td><td><input id="f_r3n" type="number" value="0" style="max-width:60px"></td><td><input id="f_r3p" type="number" value="1" style="max-width:60px"></td><td><input id="f_r3s" type="number" value="0" style="max-width:60px"></td></tr>
+<tr><td>工业设计中心</td><td><input id="f_r4n" type="number" value="0" style="max-width:60px"></td><td><input id="f_r4p" type="number" value="0" style="max-width:60px"></td><td><input id="f_r4s" type="number" value="0" style="max-width:60px"></td></tr>
+<tr><td>重点实验室</td><td><input id="f_r5n" type="number" value="0" style="max-width:60px"></td><td><input id="f_r5p" type="number" value="0" style="max-width:60px"></td><td><input id="f_r5s" type="number" value="0" style="max-width:60px"></td></tr></tbody></table>
+<div class="opt-row"><label>院士专家工作站</label><div class="og"><label><input type="radio" name="f_academician" value="true"> 有</label><label><input type="radio" name="f_academician" value="false" checked> 无</label></div></div>
+<div class="opt-row"><label>博士后工作站</label><div class="og"><label><input type="radio" name="f_postdoc" value="true"> 有</label><label><input type="radio" name="f_postdoc" value="false" checked> 无</label></div></div>
+<div class="sec-sub">合作院校机构名称（3个以内）</div>
+<div class="form-row"><label>合作机构</label><input id="f_collab1" style="flex:1" value="华南理工大学"><input id="f_collab2" style="flex:1" value="广东省科学院"><input id="f_collab3" style="flex:1"></div>
+<div class="sec-sub">研究领域已获得成果及应用情况（300字）</div>
+<div class="form-row"><label>成果及应用</label><textarea id="f_rdResult" rows="2">累计获得发明专利15项，软件著作权32项。核心产品已落地应用，累计创造营收超8000万元。</textarea></div>
+<div class="sec-sub">研发投入</div>
+<table class="sub-table"><thead><tr><th>相关指标</th><th>2023 年</th><th>2024 年</th><th>2025 年</th></tr></thead><tbody>
+<tr><td>研发费用总额（万元）</td><td><input id="f_rd23" type="number" value="280"></td><td><input id="f_rd24" type="number" value="400"></td><td><input id="f_rd25" type="number" value="580"></td></tr>
+<tr><td>研发费用占营业收入比重（%）</td><td><input id="f_rr23" type="number" step="0.1" value="7.4"></td><td><input id="f_rr24" type="number" step="0.1" value="8.0"></td><td><input id="f_rr25" type="number" step="0.1" value="8.5"></td></tr>
+<tr><td>研发人员占全部职工比重（%）</td><td><input id="f_rs23" type="number" step="0.1" value="32.7"></td><td><input id="f_rs24" type="number" step="0.1" value="34.2"></td><td><input id="f_rs25" type="number" step="0.1" value="35.9"></td></tr></tbody></table>
+<div class="sec-sub">I类知识产权情况</div>
+<div class="form-row"><label>I类知识产权总数</label><input id="f_ipTotal" type="number" style="max-width:80px" value="15"><span class="note">项</span></div>
+<div class="form-row"><label>其中</label><span class="note">发明专利</span><input id="f_patents" type="number" style="max-width:70px" value="8"><span class="note">项</span></div>
+<div class="sec-sub">科技奖励</div>
+<div class="opt-row"><label>近3年是否获得国家级科技奖励</label><div class="og">
+<label><input type="radio" name="f_natAward" value="false" checked onchange="$('f_natAwardYear').disabled=this.value!='true';$('f_natAwardName').disabled=this.value!='true'"> 否</label>
+<label><input type="radio" name="f_natAward" value="true" onchange="$('f_natAwardYear').disabled=this.value!='true';$('f_natAwardName').disabled=this.value!='true'"> 是，年份 <input id="f_natAwardYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2023" disabled>，名称 <input id="f_natAwardName" style="width:180px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="国家科技进步二等奖" disabled></label></div></div>
+<div class="opt-row"><label>近3年是否获得省级科技奖励</label><div class="og">
+<label><input type="radio" name="f_provAward" value="false"> 否</label>
+<label><input type="radio" name="f_provAward" value="true" checked> 是，年份 <input id="f_provAwardYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024">，名称 <input id="f_provAwardName" style="width:180px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="广东省科技进步一等奖"></label></div></div>
+<div class="opt-row"><label>近3年进入"创客中国"全国50强</label><div class="og">
+<label><input type="radio" name="f_chuangke" value="false" checked onchange="$('f_ckYear').disabled=this.value!='true';$('f_ckRank').disabled=this.value!='true'"> 否</label>
+<label><input type="radio" name="f_chuangke" value="true" onchange="$('f_ckYear').disabled=this.value!='true';$('f_ckRank').disabled=this.value!='true'"> 是，年份 <input id="f_ckYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024" disabled></label></div></div>
+</div>
+
+<div class="card sec-pane" id="sec-7">
+<div class="card-title">七、产业链配套</div>
+<div class="form-row"><label>所属产业链</label><select id="f_chainName"><option value="软件与信息服务产业链" selected>软件与信息服务产业链</option><option value="集成电路产业链">集成电路产业链</option><option value="高端装备制造产业链">高端装备制造</option></select></div>
+<div class="opt-row"><label>是否在产业链关键领域实现"补短板""填空白"<br><span style="font-size:11px;color:var(--text2)">（不得含企业名称或简称）</span></label>
+<div class="og"><label><input type="radio" name="f_fillGap" value="false"> 否</label><label><input type="radio" name="f_fillGap" value="true" checked> 是</label></div></div>
+<div class="form-row"><label>"补短板"产品名称</label><input id="f_gapProduct" value="国产替代智能测试平台"></div>
+<div class="form-row"><label>填补空白领域</label><input id="f_gapField" value="政务领域国产化智能测试工具"></div>
+<div class="form-row"><label>替代进口产品</label><input id="f_gapReplace" value="HP LoadRunner / IBM Rational"></div>
+<div class="form-row"><label>说明（300字以内）</label><textarea id="f_gapDesc" rows="2">实现了对进口测试工具的国产化替代，在政务、金融领域已部署超过200套。</textarea></div>
+<div class="opt-row"><label>主导产品是否为知名大企业直接配套</label><div class="og"><label><input type="radio" name="f_directSupply" value="false"> 否</label><label><input type="radio" name="f_directSupply" value="true" checked> 是</label></div></div>
+<div class="form-row"><label>配套企业</label><input id="f_sup1" style="flex:1" value="华为技术"><input id="f_sup2" style="flex:1" value="中国银行"><input id="f_sup3" style="flex:1" value="南方电网"></div>
+<div class="form-row"><label>行业领军企业（3个以内）</label><input id="f_lead1" style="flex:1" value="中国电子科技集团"><input id="f_lead2" style="flex:1" value="中软国际"><input id="f_lead3" style="flex:1"></div>
+</div>
+
+<div class="card sec-pane" id="sec-8">
+<div class="card-title">八、主导产品所属领域</div>
+<div class="form-row"><label>主导产品名称（中文）</label><input id="f_productName" value="智能测试平台 V3.0"></div>
+<div class="form-row"><label>主导产品类别</label><select id="f_productType"><option value="软件产品" selected>软件产品</option><option value="硬件产品">硬件产品</option><option value="服务">服务</option></select></div>
+<div class="opt-row"><label>是否属于工业"六基"领域</label><div class="og"><label><input type="radio" name="f_sixBase" value="false"> 否</label><label><input type="radio" name="f_sixBase" value="true" checked> 是</label></div></div>
+<div class="opt-row"><label>属于</label><div class="og">
+<label><input type="checkbox"> 核心基础零部件</label><label><input type="checkbox"> 核心基础元器件</label>
+<label><input type="checkbox" checked> 关键软件</label><label><input type="checkbox" checked> 先进基础工艺</label>
+<label><input type="checkbox"> 关键基础材料</label><label><input type="checkbox"> 产业技术基础</label></div></div>
+</div>
+
+<div class="card sec-pane" id="sec-9">
+<div class="card-title">九、其他</div>
+<div class="sec-sub">标准制定</div>
+<div class="form-row"><label>主持标准总数</label><input id="f_stdLead" type="number" style="max-width:70px" value="1"><span class="note">项</span></div>
+<div class="form-row"><label>其中</label><span class="note">国际</span><input id="f_stdIntl" type="number" style="max-width:60px" value="0"><span class="note">国家</span><input id="f_stdNat" type="number" style="max-width:60px" value="1"><span class="note">行业</span><input id="f_stdInd" type="number" style="max-width:60px" value="2"></div>
+<div class="form-row"><label>参与标准总数</label><input id="f_stdPart" type="number" style="max-width:70px" value="3"><span class="note">项</span></div>
+<div class="form-row"><label>代表性标准名称<br><span style="font-size:11px;color:var(--text2)">不超过5项</span></label><textarea id="f_stdNames" rows="1" placeholder="标准名称">GB/T 38634-2020 软件测试标准</textarea></div>
+<div class="sec-sub">获得认定的称号（有效期内）</div>
+<div class="opt-row"><div class="og" style="flex-direction:column;gap:5px">
+<label><input type="checkbox" checked> 高新技术企业</label>
+<label><input type="checkbox"> 技术创新示范企业：国家级 <input type="checkbox" style="margin-left:4px"> 省级 <input type="checkbox" style="margin-left:4px"></label>
+<label><input type="checkbox"> 工业企业知识产权运用试点企业</label>
+<label><input type="checkbox"> 智能制造试点示范企业</label>
+<label><input type="checkbox" checked> 绿色工厂</label>
+<label><input type="checkbox"> 质量标杆</label>
+<label><input type="checkbox"> 《产业基础领域先进技术产品转化应用目录》入编企业</label>
+<label><input type="checkbox"> 享受国家首台（套）重大技术装备保险补偿试点政策</label>
+<label><input type="checkbox"> 其他 <input style="width:150px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" placeholder="请说明"></label></div></div>
+<div class="sec-sub">境外经营情况</div>
+<div class="opt-row"><label>境外并购</label><div class="og"><label><input type="radio" name="f_ma" value="false" checked> 无</label><label><input type="radio" name="f_ma" value="true"> 有</label></div></div>
+<div class="opt-row"><label>境外分公司</label><div class="og"><label><input type="radio" name="f_branch" value="false" checked> 无</label><label><input type="radio" name="f_branch" value="true"> 有</label></div></div>
+<div class="opt-row"><label>境外研发机构</label><div class="og"><label><input type="radio" name="f_rdBranch" value="false" checked> 无</label><label><input type="radio" name="f_rdBranch" value="true"> 有</label></div></div>
+<div class="opt-row"><label>支付境外专利费</label><div class="og"><label><input type="radio" name="f_patentFee" value="false" checked> 无</label><label><input type="radio" name="f_patentFee" value="true"> 有</label></div></div>
+<div class="sec-sub">重大项目</div>
+<div class="opt-row"><label>近2年承担国家重大科技项目</label><div class="og"><label><input type="radio" name="f_natProject" value="false"> 否</label><label><input type="radio" name="f_natProject" value="true" checked> 是，名称 <input id="f_natProjName" style="width:230px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="国家科技重大专项：新一代智能测试技术研究"></label></div></div>
+<div class="opt-row"><label>近2年获得国家级技术创新项目</label><div class="og"><label><input type="radio" name="f_techProject" value="false"> 否</label><label><input type="radio" name="f_techProject" value="true" checked> 是，名称 <input id="f_techProjName" style="width:230px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="产业基础再造和制造业高质量发展专项"></label></div></div>
+<div class="sec-sub">企业总体情况简要介绍</div>
+<div class="form-row"><label style="min-width:130px">介绍<br><span style="font-size:11px;color:var(--text2)">2000字以内</span></label>
+<textarea id="f_companyIntro" rows="4" placeholder="一、企业经营管理概况。二、企业主导产品及技术情况。三、是否属于工业稳增长和转型升级成效明显市（州）内企业。">一、企业经营管理概况。公司成立于2015年，专注于软件测试细分领域8年，营收复合增长率约16.8%。
+
+二、企业主导产品及技术情况。核心产品实现了进口替代，拥有发明专利8项，参与制定国家标准1项。
+
+三、属于工业稳增长和转型升级成效明显市（州）内企业。</textarea></div>
+<div class="opt-row" style="padding-left:0;margin-top:8px"><label style="font-size:13px"><input type="checkbox" id="f_declaration" checked> 以上所填内容和提交资料均准确、真实、合法、有效、无涉密信息，本企业愿为此承担有关责任。</label></div>
+</div>`
+}
+
+// ===== Section nav =====
+document.querySelectorAll('.sec-nav button').forEach(b=>b.onclick=function(){
+  document.querySelectorAll('.sec-nav button').forEach(x=>x.classList.toggle('active',x===this))
+  document.querySelectorAll('.sec-pane').forEach(p=>p.classList.toggle('active',p.id==='sec-'+this.dataset.sec))
+  window.scrollTo(0,0)
+})
+
+// ===== Form operations =====
+function g(id){const e=$(id);if(!e)return null;if(e.type==='checkbox')return e.checked;if(e.type==='number')return e.value?Number(e.value):null;return e.value}
+
+function collectData(){return{
+  enterpriseId:enterpriseId,enterpriseName:ent?ent.name:'',
+  type:'XIAOJUREN',level:'国家级',category:'认定',year:2026,status:'DRAFT',
+  revenue:g('f_rev25'),mainRevenue:g('f_mRev25'),netProfit:g('f_netP25'),debtRatio:g('f_debtRatio')||g('f_debt25'),
+  rdInvestment:g('f_rd25'),rdRatio:g('f_rr25'),rdStaffRatio:g('f_rs25'),patentCount:g('f_patents'),ipClass1:g('f_ipTotal'),
+  marketYears:g('f_marketYears'),mainRevenueRatio:g('f_mainRevRatio'),revenueGrowth2yAvg:g('f_revGrowth2y'),
+  leadProductDomain:g('f_productType'),chainDescription:g('f_gapDesc'),
+  productName:g('f_productName'),productMarketShare:g('f_dom25'),
+  employees:g('f_emp25'),rdStaffCount:g('f_rdEmp25'),
+  directTechAward:document.querySelector('input[name="f_natAward"]:checked')?.value==='true',
+  directChuangke:document.querySelector('input[name="f_chuangke"]:checked')?.value==='true'
+}}
+
+function saveDraft(){
+  if(!enterpriseId){toast('缺少企业信息','error');return}
+  const d=collectData()
+  ;(curId?api('PUT','/declarations/'+curId,d):api('POST','/declarations',d)).then(r=>{
+    curId=r.id;$('formStatus').textContent='✅ 草稿已保存 (ID: '+r.id+')';toast('草稿已保存')
+  }).catch(e=>toast(e.message||'保存失败','error'))
+}
+
+function submitDecl(){
+  if(!enterpriseId){toast('缺少企业信息','error');return}
+  if(!$('f_declaration').checked){toast('请勾选真实性声明','error');return}
+  saveDraft()
+  setTimeout(()=>{
+    if(!curId){toast('请先保存草稿','error');return}
+    api('POST','/declarations/'+curId+'/submit').then(d=>{
+      toast('✅ 预申报已提交！')
+      showModal('<h3>📨 提交成功</h3><div style="margin:12px 0"><div style="padding:10px;background:#f6ffed;border-radius:6px">申报编号：<strong>'+d.declarationCode+'</strong><br>AI 评估总分：<strong style="color:'+((d.totalScore||0)>=70?'#52c41a':'#d48806')+'">'+(d.totalScore||0)+'</strong> / 100</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:13px;text-align:center"><div>专业化<br><strong>'+(d.professionalScore||0)+'</strong>/25</div><div>精细化<br><strong>'+(d.refinedScore||0)+'</strong>/25</div><div>特色化<br><strong>'+(d.featureScore||0)+'</strong>/15</div><div>创新力<br><strong>'+(d.innovationScoreDetail||0)+'</strong>/35</div></div></div><div style="text-align:right;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="closeModal();window.close()">关闭并返回门户</button></div>')
+      curId=null
+    }).catch(e=>toast(e.message||'提交失败','error'))
+  },500)
+}
+
+function resetForm(){
+  if(!confirm('确定重置所有表单数据吗？'))return
+  document.querySelectorAll('input[type=text],input[type=number],input[type=date],textarea').forEach(e=>{const v=e.getAttribute('value');if(e.type==='number')e.value=v||'';else e.value=v||''})
+  toast('已重置')
+}
+
+// Init
+init()
+</script>
+</body>
+</html>

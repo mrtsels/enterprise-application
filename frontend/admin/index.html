@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>专精特新申报管理 - 政府/协会端</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f0f2f5;color:#262626;min-height:100vh}
+:root{--primary:#722ed1;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;--bg:#f0f2f5;--card:#fff;--text2:#8c8c8c;--border:#e8e8e8;--radius:8px}
+.header{background:linear-gradient(135deg,#722ed1,#531dab);color:#fff;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:18px;font-weight:600}.header .sub{font-size:12px;opacity:.75}
+.container{max-width:1400px;margin:0 auto;padding:16px 24px}
+.app-layout{display:flex;gap:16px}
+.sidebar{width:190px;flex-shrink:0}
+.sidebar button{display:block;width:100%;padding:10px 14px;border:none;background:var(--card);text-align:left;cursor:pointer;font-size:14px;color:var(--text2);border-left:3px solid transparent;transition:all .2s;margin-bottom:2px;border-radius:0 6px 6px 0}
+.sidebar button:hover{background:#f9f0ff;color:var(--primary)}
+.sidebar button.active{background:#f9f0ff;color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.main-content{flex:1;min-width:0}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;text-align:center}
+.stat-card .num{font-size:26px;font-weight:700}.stat-card .lbl{font-size:12px;color:var(--text2)}
+table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--border)}
+th{background:#fafafa;font-weight:600;color:var(--text2);font-size:12px;white-space:nowrap}
+tr:hover td{background:#f9f0ff}
+.btn{padding:6px 16px;border-radius:6px;border:1px solid var(--border);font-size:13px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:all .2s}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+.btn-primary:hover{background:#9254de}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:#fff;color:var(--danger);border-color:var(--danger)}
+.btn-outline{background:#fff;color:var(--text2)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.search-bar{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.search-bar input{flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none}
+.search-bar input:focus,.search-bar select:focus{border-color:var(--primary)}
+.search-bar select{padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;background:#fff}
+.tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+.tag-purple{background:#f9f0ff;color:#722ed1}.tag-green{background:#f6ffed;color:#52c41a}
+.tag-orange{background:#fff7e6;color:#d48806}.tag-red{background:#fff2f0;color:#cf1322}.tag-gray{background:#f5f5f5;color:#999}.tag-blue{background:#e6f4ff;color:#1677ff}
+.status{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+.status-draft{background:#f5f5f5;color:#999}.status-pending{background:#fff7e6;color:#d48806}
+.status-approved{background:#f6ffed;color:#52c41a}.status-rejected{background:#fff2f0;color:#cf1322}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}.toast-success{background:var(--success)}.toast-error{background:var(--danger)}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;min-width:500px;max-width:90vw;max-height:90vh;overflow-y:auto}
+.modal h3{font-size:16px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#722ed1,#531dab)}
+.login-card{background:#fff;border-radius:12px;padding:36px;width:400px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.login-card h2{text-align:center;margin-bottom:4px;font-size:20px}
+.login-card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:24px}
+.login-card .f{margin-bottom:16px}.login-card .f label{font-size:13px;display:block;margin-bottom:4px;color:var(--text2)}
+.login-card .f input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none}
+.login-card button{width:100%;padding:10px;font-size:15px;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer}
+.flex{display:flex;gap:8px;align-items:center}
+.mb-2{margin-bottom:12px}.text-secondary{color:var(--text2)}.text-center{text-align:center}
+@media(max-width:900px){.app-layout{flex-direction:column}.sidebar{width:100%;display:flex;gap:2px;overflow-x:auto}.sidebar button{white-space:nowrap;border-left:none;border-bottom:2px solid transparent;border-radius:0}.sidebar button.active{border-bottom-color:var(--primary)}}
+</style>
+</head>
+<body>
+
+<div class="header" id="appHeader" style="display:none">
+  <div><h1>🏛️ 专精特新管理平台</h1><div class="sub">政府/协会端 · 申报审核 · 统计分析</div></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="font-size:13px">👤 <span id="headerUser">管理员</span></span>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="logout()">退出</button>
+  </div>
+</div>
+
+<div class="container" id="appContainer" style="display:none">
+  <div class="app-layout">
+    <div class="sidebar" id="sidebar">
+      <button class="active" data-page="dashboard">📊 总览</button>
+      <button data-page="review">📑 申报审核</button>
+      <button data-page="enterprises">🏢 企业管理</button>
+    </div>
+    <div class="main-content">
+      <div class="page active" id="page-dashboard">
+        <div class="stats" id="dashStats"></div>
+        <div class="card"><div class="card-title">📈 申报趋势</div><div id="dashChart" style="font-size:13px;color:var(--text2)">加载中...</div></div>
+        <div class="card"><div class="card-title">📋 待处理</div><div id="dashPending" style="font-size:13px">加载中...</div></div>
+      </div>
+      <div class="page" id="page-review">
+        <div class="card-title" style="margin-bottom:12px">📑 申报审核</div>
+        <div class="search-bar">
+          <input id="rSearch" placeholder="搜索企业名称..." oninput="loadReview()">
+          <select id="rStatus" onchange="loadReview()"><option value="">全部状态</option><option value="PENDING">待审核</option><option value="DRAFT">草稿</option><option value="APPROVED">已通过</option><option value="REJECTED">已驳回</option></select>
+          <select id="rType" onchange="loadReview()"><option value="">全部类型</option><option value="XIAOJUREN">小巨人</option></select>
+          <button class="btn btn-outline btn-sm" onclick="loadReview()">🔍 搜索</button>
+        </div>
+        <div id="reviewContent"></div>
+      </div>
+      <div class="page" id="page-enterprises">
+        <div class="card-title" style="margin-bottom:12px">🏢 企业管理</div>
+        <div id="entContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <h2>🏛️ 专精特新管理平台</h2>
+    <div class="sub">政府/协会端 · 管理员登录</div>
+    <div class="f"><label>用户名</label><input id="loginUser" value="admin"></div>
+    <div class="f"><label>密码</label><input id="loginPass" type="password" value="123456"></div>
+    <button onclick="login()">登 录</button>
+    <div id="loginErr" style="color:var(--danger);font-size:13px;margin-top:10px;text-align:center"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="modal-overlay" id="modal"><div class="modal" id="modalContent"></div></div>
+
+<script>
+const API='http://localhost:8080/api'
+function toast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast toast-'+t+' show';setTimeout(()=>e.classList.remove('show'),2500)}
+function showModal(h){document.getElementById('modalContent').innerHTML=h;document.getElementById('modal').classList.add('show')}
+function closeModal(){document.getElementById('modal').classList.remove('show')}
+document.getElementById('modal').onclick=e=>{if(e.target===e.currentTarget)closeModal()}
+function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):undefined}).then(r=>r.ok?r.json().catch(()=>({})):r.json().then(e=>{throw new Error(e.message||'请求失败')}))}
+
+function login(){document.getElementById('loginErr').textContent='';document.getElementById('loginPage').style.display='none';document.getElementById('appHeader').style.display='flex';document.getElementById('appContainer').style.display='block';loadDash()}
+function logout(){document.getElementById('loginPage').style.display='flex';document.getElementById('appHeader').style.display='none';document.getElementById('appContainer').style.display='none'}
+
+function switchPage(p){
+  document.querySelectorAll('#sidebar button').forEach(b=>b.classList.toggle('active',b.dataset.page===p))
+  document.querySelectorAll('.main-content .page').forEach(x=>x.classList.toggle('active',x.id==='page-'+p))
+  if(p==='dashboard')loadDash()
+  if(p==='review')loadReview()
+}
+document.querySelectorAll('#sidebar button').forEach(b=>b.onclick=()=>switchPage(b.dataset.page))
+
+function loadDash(){
+  api('GET','/declarations/stats').then(s=>{
+    document.getElementById('dashStats').innerHTML=[{k:'total',l:'总申报',c:'#722ed1'},{k:'draft',l:'草稿',c:'#999'},{k:'pending',l:'待审核',c:'#d48806'},{k:'approved',l:'已通过',c:'#52c41a'},{k:'rejected',l:'已驳回',c:'#cf1322'}].map(i=>`<div class="stat-card"><div class="num" style="color:${i.c}">${s[i.k]||0}</div><div class="lbl">${i.l}</div></div>`).join('')
+  }).catch(()=>{})
+  api('GET','/declarations?size=50').then(p=>{const items=p.content||p;document.getElementById('dashChart').innerHTML=items.length?['XIAOJUREN','PROVINCIAL','INNOVATIVE'].map(t=>{const c=items.filter(d=>d.type===t).length;return'<div style="text-align:center;padding:10px 20px;background:#f9f0ff;border-radius:8px;min-width:80px"><div style="font-size:24px;font-weight:700;color:#722ed1">'+c+'</div><div style="font-size:12px;color:var(--text2)">'+(t==='XIAOJUREN'?'小巨人':t==='PROVINCIAL'?'省级':'创新型')+'</div></div>'}).join(''):'<p>暂无数据</p>'
+    const pnd=items.filter(d=>d.status==='PENDING');document.getElementById('dashPending').innerHTML=pnd.length?pnd.slice(0,10).map(d=>'<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);align-items:center"><span><strong>'+d.enterpriseName+'</strong> <span class="tag tag-purple">小巨人</span></span><button class="btn btn-sm btn-primary" onclick="openReview('+d.id+')">审核</button></div>').join(''):'<p class="text-secondary">暂无待审核申报</p>'
+  }).catch(()=>{})
+}
+
+function loadReview(){
+  const kw=document.getElementById('rSearch').value,st=document.getElementById('rStatus').value,ty=document.getElementById('rType').value
+  api('GET','/declarations?keyword='+encodeURIComponent(kw)+'&status='+st+'&type='+ty+'&size=100').then(p=>{const items=p.content||p,e=document.getElementById('reviewContent');if(!items.length){e.innerHTML='<div class="card"><p class="text-secondary text-center">暂无申报</p></div>';return}
+  e.innerHTML='<table><thead><tr><th>ID</th><th>企业</th><th>类型</th><th>营收</th><th>评分</th><th>材料</th><th>时间</th><th>状态</th><th>操作</th></tr></thead><tbody>'+items.map(d=>'<tr><td>'+d.id+'</td><td><strong>'+d.enterpriseName+'</strong></td><td><span class="tag tag-purple">'+(d.type==='XIAOJUREN'?'小巨人':'省级')+'</span></td><td>'+(d.revenue||'-')+'万</td><td><strong>'+(d.totalScore!=null?d.totalScore:'未评')+'</strong></td><td>'+(d.materialCompleteness||0)+'%</td><td style="font-size:12px">'+((d.submitTime||d.createdAt||'').slice(0,10))+'</td><td><span class="status status-'+d.status.toLowerCase()+'">'+({DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'})[d.status]||d.status+'</span></td><td><div class="flex">'+(d.status==='PENDING'?'<button class="btn btn-sm btn-primary" onclick="openReview('+d.id+')">审核</button>':'')+'<button class="btn btn-sm btn-outline" onclick="viewDecl('+d.id+')">查看</button></div></td></tr>').join('')+'</tbody></table>'}).catch(()=>{})}
+
+function viewDecl(id){api('GET','/declarations/'+id).then(d=>{showModal('<h3>📄 申报详情 #'+d.id+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;font-size:13px"><div>企业：'+d.enterpriseName+'</div><div>编号：'+(d.declarationCode||'-')+'</div><div>营收：'+(d.revenue||'-')+'万</div><div>评分：<strong>'+(d.totalScore||0)+'</strong>/100</div></div>'+(d.reviewComment?'<div style="padding:10px;background:#f0f5ff;border-radius:6px;margin-top:8px;font-size:13px"><strong>审核意见：</strong>'+d.reviewComment+'</div>':'')+'<div style="margin-top:12px;text-align:right"><button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button></div>')}).catch(()=>toast('加载失败','error'))}
+
+function openReview(id){api('GET','/declarations/'+id).then(d=>{const s=d.totalScore||0;showModal('<h3>📑 审核 #'+d.id+' - '+d.enterpriseName+'</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;font-size:13px"><div>营收：'+(d.revenue||'-')+'万</div><div>研发：'+(d.rdInvestment||'-')+'万 ('+(d.rdRatio||'-')+'%)</div><div>产品：'+(d.productName||'-')+'</div><div>细分年限：'+(d.marketYears||'-')+'年</div></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0;text-align:center"><div style="padding:8px;background:#f0f5ff;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#1677ff">'+(d.professionalScore||0)+'</div><div style="font-size:11px;color:var(--text2)">专业化/25</div></div><div style="padding:8px;background:#f6ffed;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#52c41a">'+(d.refinedScore||0)+'</div><div style="font-size:11px;color:var(--text2)">精细化/25</div></div><div style="padding:8px;background:#fff7e6;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#d48806">'+(d.featureScore||0)+'</div><div style="font-size:11px;color:var(--text2)">特色化/15</div></div><div style="padding:8px;background:#f9f0ff;border-radius:6px"><div style="font-size:18px;font-weight:700;color:#722ed1">'+(d.innovationScoreDetail||0)+'</div><div style="font-size:11px;color:var(--text2)">创新力/35</div></div></div><div style="text-align:center;font-weight:600;padding:8px;background:#fafafa;border-radius:6px">总分：<span style="color:#722ed1">'+s+'</span>/100 '+(d.declarationEligible?'<span class="tag tag-green">符合条件</span>':'<span class="tag tag-red">不符合</span>')+'</div><div style="margin-top:12px"><label style="font-size:13px;font-weight:500">审核意见：</label><textarea id="reviewComment" rows="2" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:13px;margin-top:4px;outline:none"></textarea></div><div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="doReview('+id+',\'APPROVED\')">✅ 通过</button><button class="btn btn-danger" onclick="doReview('+id+',\'REJECTED\')">❌ 驳回</button></div>')}).catch(()=>toast('加载失败','error'))}
+
+function doReview(id,status){const c=document.getElementById('reviewComment')?.value||'';api('POST','/declarations/'+id+'/review',{status,reviewComment:c}).then(()=>{toast(status==='APPROVED'?'✅ 已通过':'已驳回');closeModal();loadReview();loadDash()}).catch(e=>toast(e.message||'操作失败','error'))}
+</script>
+</body>
+</html>

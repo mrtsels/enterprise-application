@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>专精特新"小巨人"申报 - 企业门户</title>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+body{background:#f0f2f5;color:#262626;min-height:100vh}
+:root{--primary:#1677ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;--bg:#f0f2f5;--card:#fff;--text2:#8c8c8c;--border:#e8e8e8;--radius:8px;--shadow:0 1px 4px rgba(0,0,0,.06)}
+.header{background:linear-gradient(135deg,#1677ff,#0958d9);color:#fff;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:100}
+.header h1{font-size:18px;font-weight:600}.header .sub{font-size:12px;opacity:.75}
+.container{max-width:1200px;margin:0 auto;padding:16px 24px}
+
+/* Cards */
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+
+/* Stats row */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:16px;text-align:center;box-shadow:var(--shadow);transition:transform .15s}
+.stat-card:hover{transform:translateY(-1px)}
+.stat-card .num{font-size:24px;font-weight:700;line-height:1.3}.stat-card .lbl{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* Buttons */
+.btn{padding:7px 18px;border-radius:6px;border:1px solid var(--border);font-size:13px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:5px;transition:all .2s;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff;border-color:var(--primary)}.btn-primary:hover{background:#4096ff}
+.btn-success{background:var(--success);color:#fff;border-color:var(--success)}
+.btn-danger{background:#fff;color:var(--danger);border-color:var(--danger)}
+.btn-outline{background:#fff;color:var(--text2)}.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-lg{padding:10px 24px;font-size:15px}.btn-block{width:100%;justify-content:center}
+
+/* Navigation tab bar */
+.tab-bar{display:flex;gap:0;margin-bottom:16px;background:var(--card);border-radius:var(--radius);overflow:hidden;border:1px solid var(--border)}
+.tab-bar button{flex:1;padding:11px 16px;border:none;background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--text2);transition:all .2s;position:relative;text-align:center}
+.tab-bar button:hover{background:#f0f5ff;color:var(--primary)}
+.tab-bar button.active{background:#fff;color:var(--primary);font-weight:600}
+.tab-bar button.active::after{content:'';position:absolute;bottom:0;left:20%;right:20%;height:2px;background:var(--primary);border-radius:2px 2px 0 0}
+
+/* Table */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:10px;text-align:left;border:1px solid var(--border)}
+th{background:#fafafa;font-weight:600;color:var(--text2);font-size:12px;white-space:nowrap}
+tr:hover td{background:#f0f5ff}
+
+/* Search bar */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.toolbar .search-group{display:flex;gap:8px;flex:1;min-width:280px}
+.toolbar .search-group input{flex:1;min-width:160px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;background:#fff}
+.toolbar .search-group input:focus,.toolbar select:focus{border-color:var(--primary)}
+.toolbar select{padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;background:#fff;cursor:pointer}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+.tag-blue{background:#e6f4ff;color:#1677ff}.tag-green{background:#f6ffed;color:#52c41a}
+.tag-orange{background:#fff7e6;color:#d48806}.tag-red{background:#fff2f0;color:#cf1322}.tag-gray{background:#f5f5f5;color:#999}
+
+/* Status */
+.status{display:inline-block;padding:2px 12px;border-radius:10px;font-size:12px;font-weight:500}
+.status-draft{background:#f5f5f5;color:#999}.status-pending{background:#fff7e6;color:#d48806}
+.status-approved{background:#f6ffed;color:#52c41a}.status-rejected{background:#fff2f0;color:#cf1322}
+
+/* Toast */
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;z-index:999;opacity:0;transition:opacity .3s;pointer-events:none}
+.toast.show{opacity:1}.toast-success{background:var(--success)}.toast-error{background:var(--danger)}
+
+/* Login */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1677ff,#0958d9)}
+.login-card{background:#fff;border-radius:12px;padding:36px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,.2)}
+.login-card h2{text-align:center;margin-bottom:4px;font-size:20px}
+.login-card .sub{text-align:center;color:var(--text2);font-size:13px;margin-bottom:24px}
+.login-card .f{margin-bottom:16px}
+.login-card .f label{font-size:13px;display:block;margin-bottom:4px;color:var(--text2)}
+.login-card .f input{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;background:#fff}
+.login-card .f input:focus{border-color:var(--primary)}
+.login-card button{width:100%;padding:10px;font-size:15px;justify-content:center;background:var(--primary);color:#fff;border:none;border-radius:6px;cursor:pointer}
+.login-card button:hover{background:#4096ff}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;justify-content:center;align-items:center;padding:24px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:var(--radius);padding:24px;min-width:400px;max-width:640px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.15)}
+.modal h3{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text2);padding:0 4px}
+.modal-close:hover{color:#262626}
+.modal .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px}
+.modal .detail-grid .item{padding:6px 0}
+.modal .detail-grid .item .lbl{font-size:11px;color:var(--text2);margin-bottom:2px}
+.modal .detail-grid .item .val{font-weight:500}
+
+/* Utilities */
+.flex{display:flex;gap:8px;align-items:center}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.text-secondary{color:var(--text2)}.text-center{text-align:center}
+.mb-2{margin-bottom:12px}.mt-2{margin-top:12px}
+
+/* Quick action buttons */
+.qactions{display:flex;gap:10px;flex-wrap:wrap}
+.qactions .qa-btn{flex:1;min-width:140px;padding:16px;border:1px solid var(--border);border-radius:var(--radius);background:var(--card);cursor:pointer;text-align:center;transition:all .15s}
+.qactions .qa-btn:hover{border-color:var(--primary);background:#f0f5ff;transform:translateY(-1px)}
+.qactions .qa-btn .qa-icon{font-size:24px;margin-bottom:6px}
+.qactions .qa-btn .qa-label{font-size:13px;font-weight:500;color:#262626}
+.qactions .qa-btn .qa-desc{font-size:11px;color:var(--text2);margin-top:2px}
+
+/* Empty state */
+.empty-state{padding:24px;text-align:center;color:var(--text2);font-size:14px}
+
+@media(max-width:768px){.toolbar{flex-direction:column}.toolbar .search-group{width:100%}.stats{grid-template-columns:repeat(2,1fr)}.modal{min-width:auto}}
+</style>
+</head>
+<body>
+
+<div class="header" id="appHeader" style="display:none">
+  <div><h1>📋 专精特新"小巨人"预申报</h1><div class="sub">企业门户 · 申报管理 · 进度跟踪</div></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="font-size:13px">👤 <span id="headerName"></span></span>
+    <button class="btn btn-sm" style="background:rgba(255,255,255,.2);color:#fff;border-color:rgba(255,255,255,.3)" onclick="logout()">退出</button>
+  </div>
+</div>
+
+<div class="container" id="appContainer" style="display:none">
+  <!-- Tab Nav -->
+  <div class="tab-bar">
+    <button class="active" data-page="dashboard">📊 总览</button>
+    <button data-page="list">📑 我的申报 <span id="declCount" class="tag tag-gray">0</span></button>
+    <button data-page="materials">📎 材料库</button>
+  </div>
+
+  <!-- ====== Dashboard ====== -->
+  <div class="page active" id="page-dashboard">
+    <div class="stats" id="dashStats"></div>
+    <div class="card">
+      <div class="card-title">✏️ 快捷操作</div>
+      <div class="qactions">
+        <div class="qa-btn" onclick="openForm('new')">
+          <div class="qa-icon">📋</div>
+          <div class="qa-label">新建预申报</div>
+          <div class="qa-desc">填写完整申报书</div>
+        </div>
+        <div class="qa-btn" onclick="switchPage('list')">
+          <div class="qa-icon">📂</div>
+          <div class="qa-label">我的申报</div>
+          <div class="qa-desc">查看/编辑已有申报</div>
+        </div>
+        <div class="qa-btn" onclick="switchPage('materials')">
+          <div class="qa-icon">📎</div>
+          <div class="qa-label">材料库</div>
+          <div class="qa-desc">管理上传的证明文件</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== Declaration List ====== -->
+  <div class="page" id="page-list">
+    <div class="card">
+      <div class="card-title">
+        <span>📑 申报记录</span>
+        <button class="btn btn-primary btn-sm" onclick="openForm('new')">＋ 新建</button>
+      </div>
+      <div class="toolbar mb-2">
+        <div class="search-group">
+          <input id="searchInput" placeholder="搜索企业..." oninput="loadList()">
+          <select id="statusFilter" onchange="loadList()">
+            <option value="">全部状态</option>
+            <option value="DRAFT">草稿</option>
+            <option value="PENDING">待审核</option>
+            <option value="APPROVED">已通过</option>
+            <option value="REJECTED">已驳回</option>
+          </select>
+        </div>
+        <span id="listMeta" class="text-secondary" style="font-size:12px"></span>
+      </div>
+      <div id="listContent"><div class="empty-state">加载中...</div></div>
+    </div>
+  </div>
+
+  <!-- ====== Materials ====== -->
+  <div class="page" id="page-materials">
+    <div class="card">
+      <div class="card-title">
+        <span>📎 材料库</span>
+        <span class="text-secondary" style="font-size:12px;font-weight:400">已上传的证明文件</span>
+      </div>
+      <div id="materialContent"><div class="empty-state">暂无材料</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Login -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <h2>📋 专精特新"小巨人"</h2>
+    <div class="sub">企业预申报门户</div>
+    <div class="f"><label>企业用户名</label><input id="loginUser" value="test_enterprise"></div>
+    <div class="f"><label>密码</label><input id="loginPass" type="password" value="123456"></div>
+    <button onclick="login()">登 录</button>
+    <div id="loginErr" class="text-secondary" style="font-size:13px;margin-top:10px;text-align:center"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API='http://localhost:8080/api'
+let ent=null, formWin=null
+
+function toast(m,t='success'){const e=document.getElementById('toast');e.textContent=m;e.className='toast toast-'+t+' show';setTimeout(()=>e.classList.remove('show'),2500)}
+
+function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'application/json'},body:d?JSON.stringify(d):undefined}).then(r=>r.ok?r.json().catch(()=>({})):r.json().then(e=>{throw new Error(e.message||'请求失败')}))}
+
+function switchPage(page){
+  document.querySelectorAll('.tab-bar button').forEach(b=>b.classList.toggle('active',b.dataset.page===page))
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page))
+  if(page==='dashboard')loadDash(); if(page==='list')loadList(); if(page==='materials')loadMaterials()
+}
+document.querySelectorAll('.tab-bar button').forEach(b=>b.onclick=()=>switchPage(b.dataset.page))
+
+// ===== Login =====
+function login(){
+  const u=document.getElementById('loginUser').value.trim()
+  if(!u){document.getElementById('loginErr').textContent='请输入用户名';return}
+  document.getElementById('loginErr').textContent=''
+  api('GET','/enterprises?username='+encodeURIComponent(u)).then(d=>{
+    if(Array.isArray(d)&&d.length)ent=d[0]
+    else return api('POST','/enterprises',{username:u,name:u,passwordHash:'dummy'}).then(e=>{ent=e})
+  }).then(()=>{
+    document.getElementById('loginPage').style.display='none'
+    document.getElementById('appHeader').style.display='flex'
+    document.getElementById('appContainer').style.display='block'
+    document.getElementById('headerName').textContent=ent.name
+    loadDash()
+  }).catch(e=>{document.getElementById('loginErr').textContent=e.message||'登录失败'})
+}
+
+function logout(){
+  ent=null; if(formWin&&!formWin.closed)formWin.close()
+  document.getElementById('loginPage').style.display='flex'
+  document.getElementById('appHeader').style.display='none'
+  document.getElementById('appContainer').style.display='none'
+}
+
+// ===== Open form in 3001 =====
+function openForm(mode, declId){
+  const p = new URLSearchParams({enterpriseId:ent.id, mode:mode||'new'})
+  if(declId) p.set('declarationId', declId)
+  formWin = window.open('http://localhost:3001/?'+p.toString(), 'declForm', 'width=1200,height=800,scrollbars=yes')
+  const check = setInterval(()=>{ if(formWin && formWin.closed){ clearInterval(check); loadList(); loadDash() } }, 1000)
+}
+
+// ===== Dashboard =====
+function loadDash(){
+  api('GET','/declarations/stats').then(s=>{
+    const items=[{k:'total',l:'总申报',c:'#1677ff'},{k:'draft',l:'草稿',c:'#999'},{k:'pending',l:'待审核',c:'#d48806'},{k:'approved',l:'已通过',c:'#52c41a'},{k:'rejected',l:'已驳回',c:'#cf1322'}]
+    document.getElementById('dashStats').innerHTML=items.map(i=>`<div class="stat-card"><div class="num" style="color:${i.c}">${s[i.k]||0}</div><div class="lbl">${i.l}</div></div>`).join('')
+  }).catch(()=>{})
+  if(ent)api('GET','/declarations/enterprise/'+ent.id).then(list=>{
+    document.getElementById('declCount').textContent=list.length
+  }).catch(()=>{})
+}
+
+// ===== Declaration list =====
+function loadList(){
+  const kw=document.getElementById('searchInput').value, st=document.getElementById('statusFilter').value
+  api('GET','/declarations?keyword='+encodeURIComponent(kw)+'&status='+st+'&size=50').then(page=>{
+    const items=page.content||page, el=document.getElementById('listContent')
+    document.getElementById('listMeta').textContent = items.length+' 条记录'
+    if(!items.length){el.innerHTML='<div class="empty-state">暂无匹配的申报记录</div>';return}
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>编号</th><th>类型</th><th>年度</th><th>营收</th><th>研发投入</th><th>评分</th><th>材料</th><th>状态</th><th style="min-width:110px">操作</th></tr></thead><tbody>'+
+      items.map(d=>`<tr>
+        <td style="font-size:12px">${d.declarationCode||'<span class="text-secondary">-</span>'}</td>
+        <td><span class="tag tag-blue">${{XIAOJUREN:'小巨人',PROVINCIAL:'省级',INNOVATIVE:'创新型'}[d.type]||d.type}</span></td>
+        <td>${d.year||'-'}</td>
+        <td>${d.revenue!=null?d.revenue+'万':'-'}</td>
+        <td>${d.rdInvestment!=null?d.rdInvestment+'万':'-'}</td>
+        <td><strong>${d.totalScore!=null?d.totalScore:'<span class="text-secondary">未评</span>'}</strong></td>
+        <td><span class="tag ${(d.materialCompleteness||0)>=80?'tag-green':(d.materialCompleteness||0)>=50?'tag-orange':'tag-gray'}">${d.materialCompleteness||0}%</span></td>
+        <td><span class="status status-${d.status.toLowerCase()}">${{DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'}[d.status]||d.status}</span></td>
+        <td><div class="flex" style="gap:4px">
+          <button class="btn btn-sm btn-outline" onclick="viewDecl(${d.id})">查看</button>
+          ${d.status==='DRAFT'?'<button class="btn btn-sm btn-primary" onclick="openForm(\'edit\','+d.id+')">编辑</button>':''}
+          ${d.status==='REJECTED'?'<button class="btn btn-sm btn-primary" onclick="openForm(\'edit\','+d.id+')">修改</button>':''}
+          ${d.status==='PENDING'?'<button class="btn btn-sm btn-success">审核中...</button>':''}
+        </div></td>
+      </tr>`).join('')+'</tbody></table></div>'
+  }).catch(()=>{document.getElementById('listContent').innerHTML='<div class="empty-state">加载失败，请稍后重试</div>'})
+}
+
+// ===== Detail modal =====
+function viewDecl(id){
+  api('GET','/declarations/'+id).then(d=>{
+    const st={DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'}
+    const items=[
+      {l:'企业名称',v:d.enterpriseName},
+      {l:'申报类型',v:(d.type==='XIAOJUREN'?'国家级小巨人':d.type==='PROVINCIAL'?'省级专精特新':'创新型')+(d.category?'·'+d.category:'')},
+      {l:'申报编号',v:d.declarationCode||'-'},
+      {l:'营业收入',v:d.revenue!=null?d.revenue+'万元':'-'},
+      {l:'研发投入',v:d.rdInvestment!=null?d.rdInvestment+'万元 ('+d.rdRatio+'%)':'-'},
+      {l:'净利润',v:d.netProfit!=null?d.netProfit+'万元':'-'},
+      {l:'资产负债率',v:d.debtRatio!=null?d.debtRatio+'%':'-'},
+      {l:'主导产品',v:d.productName||'-'},
+      {l:'细分市场年限',v:d.marketYears!=null?d.marketYears+'年':'-'},
+      {l:'评分',v:d.totalScore!=null?d.totalScore+'分':'未评'},
+      {l:'材料完整度',v:d.materialCompleteness+'%'},
+      {l:'提交时间',v:(d.submitTime||d.createdAt||'').slice(0,10)}
+    ]
+    showModal(
+      '<h3>📄 申报详情 <span class="status status-'+d.status.toLowerCase()+'">'+st[d.status]+'</span></h3>'+
+      '<div class="detail-grid">'+items.map(i=>'<div class="item"><div class="lbl">'+i.l+'</div><div class="val">'+i.v+'</div></div>').join('')+'</div>'+
+      (d.reviewComment?'<div style="margin-top:12px;padding:12px;background:#f0f5ff;border-radius:6px;font-size:13px"><strong>审核意见：</strong><br>'+d.reviewComment+'</div>':'')
+    )
+  }).catch(()=>toast('加载失败','error'))
+}
+
+function showModal(html){
+  const ov=document.createElement('div');ov.className='modal-overlay show';ov.id='_modal'
+  ov.innerHTML='<div class="modal">'+html+'<div style="margin-top:16px;text-align:right"><button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button></div></div>'
+  ov.onclick=e=>{if(e.target===e.currentTarget)closeModal()}
+  document.body.appendChild(ov)
+}
+function closeModal(){const m=document.getElementById('_modal');if(m)m.remove()}
+
+// ===== Materials =====
+function loadMaterials(){
+  if(!ent)return
+  api('GET','/documents/enterprise/'+ent.id).then(list=>{
+    const el=document.getElementById('materialContent')
+    if(!list.length){el.innerHTML='<div class="empty-state">暂无上传材料，请先在申报中上传证明材料。</div>';return}
+    el.innerHTML='<div class="table-wrap"><table><thead><tr><th>文件名</th><th>分类</th><th>大小</th><th>上传时间</th></tr></thead><tbody>'+
+      list.map(d=>'<tr><td>'+d.name+'</td><td>'+(d.category||'-')+'</td><td>'+(d.fileSize?Math.round(d.fileSize/1024)+'KB':'-')+'</td><td>'+(d.createdAt||'').slice(0,10)+'</td></tr>').join('')+
+    '</tbody></table></div>'
+  }).catch(()=>{document.getElementById('materialContent').innerHTML='<div class="empty-state">加载失败</div>'})
+}
+</script>
+</body>
+</html>
