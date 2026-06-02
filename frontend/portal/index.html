@@ -33,9 +33,12 @@ body{background:#f0f2f5;color:#262626;min-height:100vh}
 /* Table */
 .table-wrap{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:10px;text-align:left;border:1px solid var(--border)}
-th{background:#fafafa;font-weight:600;color:var(--text2);font-size:12px;white-space:nowrap}
+th,td{padding:10px;text-align:left;border:1px solid var(--border);white-space:nowrap}
+th{background:#fafafa;font-weight:600;color:var(--text2);font-size:12px}
 tr:hover td{background:#f0f5ff}
+.table-wrap td:last-child,.table-wrap th:last-child{position:sticky;right:0;background:inherit;border-left:2px solid var(--border);z-index:1}
+.table-wrap tr:hover td:last-child{background:#f0f5ff}
+.table-wrap th:last-child{background:#fafafa;z-index:2}
 
 /* Search bar */
 .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
