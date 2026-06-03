@@ -255,48 +255,11 @@ function loadList(){
         <td><span class="tag ${(d.materialCompleteness||0)>=80?'tag-green':(d.materialCompleteness||0)>=50?'tag-orange':'tag-gray'}">${d.materialCompleteness||0}%</span></td>
         <td><span class="status status-${d.status.toLowerCase()}">${{DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'}[d.status]||d.status}</span></td>
         <td><div class="flex" style="gap:4px">
-          <button class="btn btn-sm btn-outline" onclick="viewDecl(${d.id})">查看</button>
-          ${d.status==='DRAFT'?'<button class="btn btn-sm btn-primary" onclick="openForm(\'edit\','+d.id+')">编辑</button>':''}
-          ${d.status==='REJECTED'?'<button class="btn btn-sm btn-primary" onclick="openForm(\'edit\','+d.id+')">修改</button>':''}
-          ${d.status==='PENDING'?'<button class="btn btn-sm btn-success">审核中...</button>':''}
+          <button class="btn btn-sm ${d.status==='DRAFT'?'btn-primary':'btn-outline'}" onclick="openForm('${d.status==='DRAFT'?'edit':'view'}',${d.id})">${d.status==='DRAFT'?'编辑':'查看'}</button>
         </div></td>
       </tr>`).join('')+'</tbody></table></div>'
   }).catch(()=>{document.getElementById('listContent').innerHTML='<div class="empty-state">加载失败，请稍后重试</div>'})
 }
-
-// ===== Detail modal =====
-function viewDecl(id){
-  api('GET','/declarations/'+id).then(d=>{
-    const st={DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'}
-    const items=[
-      {l:'企业名称',v:d.enterpriseName},
-      {l:'申报类型',v:(d.type==='XIAOJUREN'?'国家级小巨人':d.type==='PROVINCIAL'?'省级专精特新':'创新型')+(d.category?'·'+d.category:'')},
-      {l:'申报编号',v:d.declarationCode||'-'},
-      {l:'营业收入',v:d.revenue!=null?d.revenue+'万元':'-'},
-      {l:'研发投入',v:d.rdInvestment!=null?d.rdInvestment+'万元 ('+d.rdRatio+'%)':'-'},
-      {l:'净利润',v:d.netProfit!=null?d.netProfit+'万元':'-'},
-      {l:'资产负债率',v:d.debtRatio!=null?d.debtRatio+'%':'-'},
-      {l:'主导产品',v:d.productName||'-'},
-      {l:'细分市场年限',v:d.marketYears!=null?d.marketYears+'年':'-'},
-      {l:'评分',v:d.totalScore!=null?d.totalScore+'分':'未评'},
-      {l:'材料完整度',v:d.materialCompleteness+'%'},
-      {l:'提交时间',v:(d.submitTime||d.createdAt||'').slice(0,10)}
-    ]
-    showModal(
-      '<h3>📄 申报详情 <span class="status status-'+d.status.toLowerCase()+'">'+st[d.status]+'</span></h3>'+
-      '<div class="detail-grid">'+items.map(i=>'<div class="item"><div class="lbl">'+i.l+'</div><div class="val">'+i.v+'</div></div>').join('')+'</div>'+
-      (d.reviewComment?'<div style="margin-top:12px;padding:12px;background:#f0f5ff;border-radius:6px;font-size:13px"><strong>审核意见：</strong><br>'+d.reviewComment+'</div>':'')
-    )
-  }).catch(()=>toast('加载失败','error'))
-}
-
-function showModal(html){
-  const ov=document.createElement('div');ov.className='modal-overlay show';ov.id='_modal'
-  ov.innerHTML='<div class="modal">'+html+'<div style="margin-top:16px;text-align:right"><button class="btn btn-outline btn-sm" onclick="closeModal()">关闭</button></div></div>'
-  ov.onclick=e=>{if(e.target===e.currentTarget)closeModal()}
-  document.body.appendChild(ov)
-}
-function closeModal(){const m=document.getElementById('_modal');if(m)m.remove()}
 
 // ===== Materials =====
 function loadMaterials(){

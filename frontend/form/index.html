@@ -153,18 +153,43 @@ async function init(){
   if(curId){
     try{
       const d=await api('GET','/declarations/'+curId)
-      $('formStatus').textContent='📝 编辑申报 #'+curId
-      if(d.revenue&&$('f_rev25'))$('f_rev25').value=d.revenue
-      if(d.rdInvestment&&$('f_rdInv25'))$('f_rdInv25').value=d.rdInvestment
-      if(d.rdRatio&&$('f_rdRatio25'))$('f_rdRatio25').value=d.rdRatio
-      if(d.marketYears&&$('f_marketYears'))$('f_marketYears').value=d.marketYears
-      if(d.productName&&$('f_productName'))$('f_productName').value=d.productName
-      if(d.mainRevenueRatio&&$('f_mainRevRatio'))$('f_mainRevRatio').value=d.mainRevenueRatio
-      if(d.revenueGrowth2yAvg&&$('f_revGrowth2y'))$('f_revGrowth2y').value=d.revenueGrowth2yAvg
-      if(d.debtRatio&&$('f_debt25'))$('f_debt25').value=d.debtRatio
-      if(d.netProfit&&$('f_netP25'))$('f_netP25').value=d.netProfit
-      if(d.revenue&&$('f_rev25'))$('f_rev25').value=d.revenue
+      $('formStatus').textContent = mode === 'view' ? '🔍 查看申报 #'+curId : '📝 编辑申报 #'+curId
+      // 加载字段填充
+      if(d.enterpriseName) $('f_name').value = d.enterpriseName
+      if(d.creditCode) $('f_creditCode').value = d.creditCode
+      if(d.legalRepresentative) $('f_legalRep').value = d.legalRepresentative
+      if(d.estDate) $('f_estDate').value = d.estDate
+      if(d.fullAddress) $('f_address').value = d.fullAddress
+      if(d.registeredCapital) $('f_regCapital').value = d.registeredCapital
+      if(d.province && $('f_province')) { setSel('f_province', d.province); updCity(); }
+      if(d.city && $('f_city')) { setTimeout(()=>setSel('f_city', d.city), 100); updDist(); }
+      if(d.district && $('f_district')) { setTimeout(()=>setSel('f_district', d.district), 200); }
+      if(d.contactPerson) $('f_contact').value = d.contactPerson
+      if(d.contactPhone) $('f_tel').value = d.contactPhone
+      if(d.contactMobile) $('f_mobile').value = d.contactMobile
+      if(d.email) $('f_email').value = d.email
+
+      if(d.revenue)$('f_rev25').value=d.revenue
+      if(d.rdInvestment)$('f_rdInv25').value=d.rdInvestment
+      if(d.rdRatio)$('f_rdRatio25').value=d.rdRatio
+      if(d.marketYears)$('f_marketYears').value=d.marketYears
+      if(d.productName)$('f_productName').value=d.productName
+      if(d.mainRevenueRatio)$('f_mainRevRatio').value=d.mainRevenueRatio
+      if(d.revenueGrowth2yAvg)$('f_revGrowth2y').value=d.revenueGrowth2yAvg
+      if(d.debtRatio)$('f_debt25').value=d.debtRatio
+      if(d.netProfit)$('f_netP25').value=d.netProfit
     }catch(e){toast('加载申报数据失败','error')}
+
+    // 查看模式：锁定所有字段，隐藏操作按钮
+    if (mode === 'view') {
+      setAllFieldsReadonly()
+      // 锁定底部工具栏
+      const bar = document.querySelector('.bottom-bar')
+      if (bar) bar.style.display = 'none'
+      // 隐藏OCR区域
+      const blCard = document.querySelector('.bl-upload-card')
+      if (blCard) blCard.style.display = 'none'
+    }
   }else{
     $('formStatus').textContent='📝 新建预申报'
   }
@@ -536,6 +561,32 @@ function clearAllFields() {
   // 清空 label/span 类的文本值（如资产负债率只读字段）
   const debtEl = $('f_debtRatio')
   if (debtEl) debtEl.value = ''
+}
+
+function setSel(id, val) {
+  const sel = $(id)
+  if (!sel) return
+  for (const opt of sel.options) {
+    if (opt.value === val) { sel.value = val; break }
+  }
+}
+
+function setAllFieldsReadonly() {
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.readOnly = true
+      el.style.background = '#f5f5f5'
+      el.style.cursor = 'default'
+    } else if (el.tagName === 'SELECT') {
+      el.disabled = true
+      el.style.background = '#f5f5f5'
+      el.style.cursor = 'default'
+    }
+  })
+  // 禁用radio/checkbox
+  document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(el => {
+    el.disabled = true
+  })
 }
 
 // ===== Business License OCR =====
