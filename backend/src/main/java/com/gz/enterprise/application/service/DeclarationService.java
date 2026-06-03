@@ -2,6 +2,7 @@ package com.gz.enterprise.application.service;
 
 import com.gz.enterprise.application.domain.Declaration;
 import com.gz.enterprise.application.domain.DeclarationMaterial;
+import com.gz.enterprise.application.domain.Document;
 import com.gz.enterprise.application.repository.DeclarationMaterialRepository;
 import com.gz.enterprise.application.repository.DeclarationRepository;
 import com.gz.enterprise.application.service.OcrService;

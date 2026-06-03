@@ -584,7 +584,8 @@ function renderBlUploadCard() {
 // 刷新上传卡片状态：MISSING → 展示上传按钮；UPLOADED/IDENTIFIED → 绿色已上传
 async function refreshBlUploadStatus() {
   const body = $('blUploadBody')
-  if (!body || !curId) {
+  if (!body) return
+  if (!curId) {
     renderBlUploadEmpty()
     return
   }
@@ -598,16 +599,16 @@ async function refreshBlUploadStatus() {
       renderBlUploadEmpty()
     } else {
       // UPLOADED / IDENTIFIED — 显示已上传状态
-      body.innerHTML = \`
+      body.innerHTML = `
   <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px">
     <div style="font-size:36px">✅</div>
     <div style="font-size:14px;font-weight:600;color:#52c41a">营业执照已上传</div>
-    <div style="font-size:12px;color:var(--text2)">状态：\${blMat.status === 'IDENTIFIED' ? '已识别' : '已上传'}</div>
+    <div style="font-size:12px;color:var(--text2)">状态：${blMat.status === 'IDENTIFIED' ? '已识别' : '已上传'}</div>
     <div class="bl-preview-actions" style="display:flex;gap:8px">
-      \${blMat.documentId ? '<button class="btn btn-sm btn-outline" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
-      \${mode !== 'view' ? '<button class="btn btn-sm btn-primary" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
+      ${blMat.documentId ? '<button class="btn btn-sm btn-outline" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
+      ${mode !== 'view' ? '<button class="btn btn-sm btn-primary" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
     </div>
-  </div>\`
+  </div>`
     }
   } catch(e) {
     renderBlUploadEmpty()
@@ -620,7 +621,7 @@ function renderBlUploadEmpty() {
   if (!body) return
   $('bl-status-badge').textContent = '未上传'
   $('bl-status-badge').className = 'bl-upload-badge'
-  body.innerHTML = \`
+  body.innerHTML = `
     <div class="bl-dropzone" id="bl-dropzone">
       <div class="bl-dropzone-icon">📄</div>
       <div class="bl-dropzone-text">点击或拖拽上传营业执照</div>
@@ -637,7 +638,7 @@ function renderBlUploadEmpty() {
     <div class="bl-progress" id="bl-progress" style="display:none">
       <div class="bl-progress-bar"><div class="bl-progress-fill" id="bl-progress-fill"></div></div>
       <div class="bl-progress-text" id="bl-progress-text">正在上传...</div>
-    </div>\`
+    </div>`
   initBlDropzone()
 }
 
