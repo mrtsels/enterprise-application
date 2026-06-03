@@ -186,15 +186,29 @@ async function init(){
       if (d.formData) {
         try {
           const fd = JSON.parse(d.formData)
-          for (const [id, val] of Object.entries(fd)) {
-            const el = $(id)
+          // 按位置索引所有 checkbox（与 collectAllFormData 对应）
+          const allCb = document.querySelectorAll('.sec-pane input[type=checkbox]')
+          for (const [key, val] of Object.entries(fd)) {
+            // radio: 用 name 查找组
+            const radios = document.querySelectorAll(`input[name="${key}"]`)
+            if (radios.length > 0) {
+              radios.forEach(r => { r.checked = r.value === val })
+              continue
+            }
+            // checkbox: 按位置索引 _cb_N
+            const cbMatch = key.match(/^_cb_(\d+)$/)
+            if (cbMatch) {
+              const cb = allCb[parseInt(cbMatch[1])]
+              if (cb) cb.checked = val === true || val === 'true'
+              continue
+            }
+            // 普通元素：用 id 查找
+            const el = $(key)
             if (!el) continue
-            if (el.type === 'radio') {
-              document.querySelectorAll(`input[name="${id}"]`).forEach(r => { r.checked = r.value === val })
-            } else if (el.type === 'checkbox') {
+            if (el.type === 'checkbox') {
               el.checked = val === true || val === 'true'
             } else if (el.tagName === 'SELECT') {
-              setSel(id, val)
+              setSel(key, val)
             } else {
               el.value = val
             }
@@ -420,8 +434,8 @@ function renderForm(){
 <label><input type="radio" name="f_provAward" value="false"> 否</label>
 <label><input type="radio" name="f_provAward" value="true" checked> 是，年份 <input id="f_provAwardYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024">，名称 <input id="f_provAwardName" style="width:180px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="广东省科技进步一等奖"></label></div></div>
 <div class="opt-row"><label>近3年进入"创客中国"全国50强</label><div class="og">
-<label><input type="radio" name="f_chuangke" value="false" checked onchange="$('f_ckYear').disabled=this.value!='true';$('f_ckRank').disabled=this.value!='true'"> 否</label>
-<label><input type="radio" name="f_chuangke" value="true" onchange="$('f_ckYear').disabled=this.value!='true';$('f_ckRank').disabled=this.value!='true'"> 是，年份 <input id="f_ckYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024" disabled></label></div></div>
+<label><input type="radio" name="f_chuangke" value="false" checked onchange="$('f_ckYear').disabled=this.value!='true'"> 否</label>
+<label><input type="radio" name="f_chuangke" value="true" onchange="$('f_ckYear').disabled=this.value!='true'"> 是，年份 <input id="f_ckYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024" disabled></label></div></div>
 </div>
 
 <div class="card sec-pane" id="sec-7">
@@ -499,11 +513,12 @@ function g(id){const e=$(id);if(!e)return null;if(e.type==='checkbox')return e.c
 // 收集表单全部字段（用于持久化和保存到后端）
 function collectAllFormData() {
   const data = {}
+  let cbIdx = 0
   document.querySelectorAll('.sec-pane input, .sec-pane select, .sec-pane textarea').forEach(el => {
     if (el.type === 'radio') {
       if (el.checked) data[el.name] = el.value
     } else if (el.type === 'checkbox') {
-      data[el.id || el.name] = el.checked
+      data[el.id || '_cb_' + (cbIdx++)] = el.checked
     } else if (el.tagName === 'SELECT') {
       data[el.id] = el.value
     } else if (el.type !== 'file') {
@@ -524,30 +539,38 @@ function collectData(){return{
   employees:g('f_emp25'),rdStaffCount:g('f_rdEmp25'),
   directTechAward:document.querySelector('input[name="f_natAward"]:checked')?.value==='true',
   directChuangke:document.querySelector('input[name="f_chuangke"]:checked')?.value==='true',
+  // 企业基本字段（独立列）
+  creditCode:g('f_creditCode'),legalRepresentative:g('f_legalRep'),
+  estDate:g('f_estDate'),fullAddress:g('f_address'),
+  registeredCapital:g('f_regCapital'),
+  province:document.getElementById('f_province')?.value,
+  city:document.getElementById('f_city')?.value,
+  district:document.getElementById('f_district')?.value,
+  contactPerson:g('f_contact'),contactPhone:g('f_tel'),
+  contactMobile:g('f_mobile'),email:g('f_email'),
   // 完整表单JSON，用于保存所有字段
   formData: JSON.stringify(collectAllFormData())
 }}
 
 function saveDraft(){
-  if(!enterpriseId){toast('缺少企业信息','error');return}
+  if(!enterpriseId){toast('缺少企业信息','error');return Promise.reject('缺少企业信息')}
   const d=collectData()
-  ;(curId?api('PUT','/declarations/'+curId,d):api('POST','/declarations',d)).then(r=>{
+  return (curId?api('PUT','/declarations/'+curId,d):api('POST','/declarations',d)).then(r=>{
     curId=r.id;$('formStatus').textContent='✅ 草稿已保存 (ID: '+r.id+')';toast('草稿已保存')
-  }).catch(e=>toast(e.message||'保存失败','error'))
+  }).catch(e=>{toast(e.message||'保存失败','error');throw e})
 }
 
-function submitDecl(){
+async function submitDecl(){
   if(!enterpriseId){toast('缺少企业信息','error');return}
   if(!$('f_declaration').checked){toast('请勾选真实性声明','error');return}
-  saveDraft()
-  setTimeout(()=>{
+  try {
+    await saveDraft()
     if(!curId){toast('请先保存草稿','error');return}
-    api('POST','/declarations/'+curId+'/submit').then(d=>{
-      toast('✅ 预申报已提交！')
-      showModal('<h3>📨 提交成功</h3><div style="margin:12px 0"><div style="padding:10px;background:#f6ffed;border-radius:6px">申报编号：<strong>'+d.declarationCode+'</strong><br>AI 评估总分：<strong style="color:'+((d.totalScore||0)>=70?'#52c41a':'#d48806')+'">'+(d.totalScore||0)+'</strong> / 100</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:13px;text-align:center"><div>专业化<br><strong>'+(d.professionalScore||0)+'</strong>/25</div><div>精细化<br><strong>'+(d.refinedScore||0)+'</strong>/25</div><div>特色化<br><strong>'+(d.featureScore||0)+'</strong>/15</div><div>创新力<br><strong>'+(d.innovationScoreDetail||0)+'</strong>/35</div></div></div><div style="text-align:right;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="closeModal();location.href=\'http://localhost:3000\'">关闭并返回门户</button></div>')
-      curId=null
-    }).catch(e=>toast(e.message||'提交失败','error'))
-  },500)
+    const d=await api('POST','/declarations/'+curId+'/submit')
+    toast('✅ 预申报已提交！')
+    showModal('<h3>📨 提交成功</h3><div style="margin:12px 0"><div style="padding:10px;background:#f6ffed;border-radius:6px">申报编号：<strong>'+d.declarationCode+'</strong><br>AI 评估总分：<strong style="color:'+((d.totalScore||0)>=70?'#52c41a':'#d48806')+'">'+(d.totalScore||0)+'</strong> / 100</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:8px;font-size:13px;text-align:center"><div>专业化<br><strong>'+(d.professionalScore||0)+'</strong>/25</div><div>精细化<br><strong>'+(d.refinedScore||0)+'</strong>/25</div><div>特色化<br><strong>'+(d.featureScore||0)+'</strong>/15</div><div>创新力<br><strong>'+(d.innovationScoreDetail||0)+'</strong>/35</div></div></div><div style="text-align:right;margin-top:10px"><button class="btn btn-primary btn-sm" onclick="closeModal();location.href=\'http://localhost:3000\'">关闭并返回门户</button></div>')
+    curId=null
+  } catch(e) { toast(e.message||'提交失败','error') }
 }
 
 function resetForm(){
@@ -559,7 +582,6 @@ function resetForm(){
 function clearAllFields() {
   document.querySelectorAll('input, select, textarea').forEach(el => {
     if (el.type === 'radio' || el.type === 'checkbox') {
-      el.checked = el.defaultChecked
       // 清空 checked：去掉 defaultChecked（演示模式默认打勾的也清掉）
       el.checked = false
     } else if (el.type === 'number') {
