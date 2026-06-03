@@ -156,30 +156,30 @@ function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'applic
 const MATERIAL_CONFIG = [
   // 基础资质 (sec-1)
   { name:'营业执照（副本）',            group:'基础资质', section:1, required:true, ocr:true,  docTypes:'.jpg,.jpeg,.png', condition:null },
-  { name:'中小企业划型认定证明',        group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'企业章程（最新版）',          group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'法定代表人身份证明',          group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'中小企业划型认定证明',        group:'基础资质', section:1, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'企业章程（最新版）',          group:'基础资质', section:1, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'法定代表人身份证明',          group:'基础资质', section:1, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
   // 财务指标 (sec-2)
-  { name:'近两年财务审计报告',          group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'近三年研发费用专项审计报告',  group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'主营业务收入明细表',          group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'资产负债表（近三年）',        group:'财务指标', section:2, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'近两年财务审计报告',          group:'财务指标', section:2, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'近三年研发费用专项审计报告',  group:'财务指标', section:2, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'主营业务收入明细表',          group:'财务指标', section:2, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'资产负债表（近三年）',        group:'财务指标', section:2, required:false, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
   // 创新能力 (sec-6)
-  { name:'知识产权证书',                group:'创新能力', section:6, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'研发机构证明材料',            group:'创新能力', section:6, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'研发人员花名册及社保证明',    group:'创新能力', section:6, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'科技成果转化情况说明',        group:'创新能力', section:6, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'知识产权证书',                group:'创新能力', section:6, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'研发机构证明材料',            group:'创新能力', section:6, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'研发人员花名册及社保证明',    group:'创新能力', section:6, required:false, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'科技成果转化情况说明',        group:'创新能力', section:6, required:false, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
   // 经营规范 (sec-4 精细化)
-  { name:'管理体系认证证书',            group:'经营规范', section:4, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'数字化水平自测结果截图',      group:'经营规范', section:4, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png', condition:null },
-  { name:'信息化系统建设说明',          group:'经营规范', section:4, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'管理体系认证证书',            group:'经营规范', section:4, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'数字化水平自测结果截图',      group:'经营规范', section:4, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png', condition:null },
+  { name:'信息化系统建设说明',          group:'经营规范', section:4, required:false, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
   // 经营规范 (sec-7 产业链配套 — 承诺函/安环证明在此处最自然)
-  { name:'无违法记录承诺函',            group:'经营规范', section:7, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'近两年无重大安全/环保事故证明', group:'经营规范', section:7, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'无违法记录承诺函',            group:'经营规范', section:7, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'近两年无重大安全/环保事故证明', group:'经营规范', section:7, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
   // 特色化 (sec-5)
-  { name:'自有品牌证明及市场占有率报告',  group:'特色化', section:5, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'主导产品细分市场排名证明',      group:'特色化', section:5, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'国家级小巨人补充材料',          group:'特色化', section:5, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:'XIAOJUREN' },
+  { name:'自有品牌证明及市场占有率报告',  group:'特色化', section:5, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'主导产品细分市场排名证明',      group:'特色化', section:5, required:false, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'国家级小巨人补充材料',          group:'特色化', section:5, required:true, ocr:true, docTypes:'.jpg,.jpeg,.png,.pdf', condition:'XIAOJUREN' },
 ]
 const uploadState = {} // keyed by materialName: { file, materialId }
 
@@ -226,7 +226,8 @@ async function embedInlineMaterials() {
   for (let s = 1; s <= 9; s++) {
     const container = document.getElementById('inline-mats-'+s)
     if (!container) continue
-    const items = bySec[s] || []
+    // 营业执照已在第1节有独立卡片，跳过
+    const items = (bySec[s] || []).filter(c => !(s === 1 && c.name === '营业执照（副本）'))
     if (!items.length) { container.style.display = 'none'; continue }
     container.style.display = ''
     let html = ''
@@ -362,9 +363,11 @@ async function startMatUpload(idx) {
   }
 
   const isOcr = cfg.ocr === true
-  const url = isOcr
+  const url = isOcr && cfg.name === '营业执照（副本）'
     ? API+'/declarations/'+curId+'/ocr/business-license'
-    : API+'/declarations/'+curId+'/materials/'+matId+'/upload'
+    : isOcr
+      ? API+'/declarations/'+curId+'/ocr/material?materialName='+encodeURIComponent(cfg.name)
+      : API+'/declarations/'+curId+'/materials/'+matId+'/upload'
 
   const fd = new FormData(); fd.append('file',state.file)
   delete uploadState[cfg.name]

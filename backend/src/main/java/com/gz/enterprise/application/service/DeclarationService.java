@@ -501,6 +501,22 @@ public class DeclarationService {
     }
 
     /**
+     * 通用 OCR：对指定材料进行识别并提取字段（所有材料通用入口）
+     */
+    @Transactional
+    public Map<String, Object> recognizeMaterial(MultipartFile file, Long declarationId, String materialName) {
+        Declaration declaration = get(declarationId);
+
+        List<DeclarationMaterial> materials = materialRepo.findByDeclarationId(declarationId);
+        DeclarationMaterial material = materials.stream()
+                .filter(m -> materialName.equals(m.getMaterialName()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("未找到材料记录：" + materialName));
+
+        return ocrService.recognize(file, declarationId, material.getId(), declaration.getEnterpriseId(), material.getMaterialName());
+    }
+
+    /**
      * 上传材料文件（仅保存文件到 document，更新 material 状态，不触发 OCR）
      */
     @Transactional

@@ -122,6 +122,14 @@ public class DeclarationController {
         return declarationService.recognizeBusinessLicense(file, id);
     }
 
+    @PostMapping("/{id}/ocr/material")
+    public Map<String, Object> ocrMaterial(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("materialName") String materialName) {
+        return declarationService.recognizeMaterial(file, id, materialName);
+    }
+
     // ==================== 材料文件上传 ====================
 
     @PostMapping("/{id}/materials/{materialId}/upload")
