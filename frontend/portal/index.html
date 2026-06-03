@@ -256,6 +256,7 @@ function loadList(){
         <td><span class="status status-${d.status.toLowerCase()}">${{DRAFT:'草稿',PENDING:'待审核',APPROVED:'已通过',REJECTED:'已驳回'}[d.status]||d.status}</span></td>
         <td><div class="flex" style="gap:4px">
           <button class="btn btn-sm ${d.status==='DRAFT'?'btn-primary':'btn-outline'}" onclick="openForm('${d.status==='DRAFT'?'edit':'view'}',${d.id})">${d.status==='DRAFT'?'编辑':'查看'}</button>
+          ${d.status==='DRAFT'?'<button class="btn btn-sm btn-danger" onclick="deleteDecl('+d.id+')">删除</button>':''}
         </div></td>
       </tr>`).join('')+'</tbody></table></div>'
   }).catch(()=>{document.getElementById('listContent').innerHTML='<div class="empty-state">加载失败，请稍后重试</div>'})
@@ -271,6 +272,15 @@ function loadMaterials(){
       list.map(d=>'<tr><td>'+d.name+'</td><td>'+(d.category||'-')+'</td><td>'+(d.fileSize?Math.round(d.fileSize/1024)+'KB':'-')+'</td><td>'+(d.createdAt||'').slice(0,10)+'</td></tr>').join('')+
     '</tbody></table></div>'
   }).catch(()=>{document.getElementById('materialContent').innerHTML='<div class="empty-state">加载失败</div>'})
+}
+
+function deleteDecl(id){
+  if(!confirm('确定要删除该草稿吗？此操作不可恢复。')) return
+  api('DELETE','/declarations/'+id).then(()=>{
+    toast('草稿已删除')
+    loadList()
+    loadDash()
+  }).catch(e=>toast(e.message||'删除失败','error'))
 }
 
 // ===== Auto-restore login session =====
