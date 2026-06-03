@@ -50,26 +50,6 @@ body{background:#f0f2f5;color:#262626}
 .modal{background:#fff;border-radius:var(--radius);padding:24px;min-width:380px;max-width:90vw;max-height:90vh;overflow-y:auto}
 .modal h3{font-size:15px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 
-/* Business License Upload */
-.bl-upload-card{background:#fafcff;border:1px dashed #1677ff;border-radius:8px;margin-bottom:14px;overflow:hidden}
-.bl-upload-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#f0f5ff;border-bottom:1px solid #e6f0ff}
-.bl-upload-title{font-size:13px;font-weight:600;color:#1677ff}
-.bl-upload-badge{font-size:11px;padding:2px 8px;border-radius:10px;background:#d9d9d9;color:#595959}
-.bl-upload-badge.success{background:#f6ffed;color:#52c41a;border:1px solid #b7eb8f}
-.bl-upload-badge.uploaded{background:#e6f7ff;color:#1677ff;border:1px solid #91d5ff}
-.bl-upload-body{padding:12px}
-.bl-dropzone{border:2px dashed #d9d9d9;border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:border-color .2s,background .2s}
-.bl-dropzone:hover,.bl-dropzone.dragover{border-color:#1677ff;background:#f0f5ff}
-.bl-dropzone-icon{font-size:32px;margin-bottom:6px}
-.bl-dropzone-text{font-size:14px;color:#262626;font-weight:500}
-.bl-dropzone-hint{font-size:12px;color:#8c8c8c;margin-top:4px}
-.bl-preview{display:flex;flex-direction:column;align-items:center;gap:8px}
-.bl-preview-img{max-height:160px;max-width:100%;border-radius:6px;border:1px solid #e8e8e8;box-shadow:0 1px 4px rgba(0,0,0,.08)}
-.bl-preview-actions{display:flex;gap:8px}
-.bl-progress{text-align:center}
-.bl-progress-bar{height:6px;background:#f0f0f0;border-radius:3px;overflow:hidden;margin:8px 0}
-.bl-progress-fill{height:100%;background:#1677ff;border-radius:3px;width:0%;transition:width .3s}
-.bl-progress-text{font-size:12px;color:#8c8c8c}
 .ocr-badge{display:inline-block;font-size:11px;color:#52c41a;background:#f6ffed;border:1px solid #b7eb8f;border-radius:3px;padding:1px 5px;margin-left:6px;font-weight:500}
 .ocr-badge-future{display:inline-block;font-size:11px;color:#8c8c8c;background:#f5f5f5;border:1px solid #d9d9d9;border-radius:3px;padding:1px 5px;margin-left:6px}
 
@@ -226,8 +206,7 @@ async function embedInlineMaterials() {
   for (let s = 1; s <= 9; s++) {
     const container = document.getElementById('inline-mats-'+s)
     if (!container) continue
-    // 营业执照已在第1节有独立卡片，跳过
-    const items = (bySec[s] || []).filter(c => !(s === 1 && c.name === '营业执照（副本）'))
+    const items = bySec[s] || []
     if (!items.length) { container.style.display = 'none'; continue }
     container.style.display = ''
     let html = ''
@@ -334,7 +313,7 @@ async function refreshMatCard(cfg) {
     }
   }
   // 同步更新第1节营业执照卡片
-  if (cfg.name === '营业执照（副本）') refreshBlUploadStatus()
+  if (cfg.name === '营业执照（副本）') embedInlineMaterials()
 }
 
 async function startMatUpload(idx) {
@@ -384,7 +363,7 @@ async function startMatUpload(idx) {
       if (pt) pt.textContent = isOcr ? '识别完成...' : '✅ 上传完成'
       if (isOcr) {
         if (pt) pt.textContent = '识别完成，正在填充表单...'
-        try { const r = JSON.parse(xhr.responseText); setTimeout(()=>{applyBlOcrResult(r);refreshMatCard(cfg)},300) }
+        try { const r = JSON.parse(xhr.responseText); setTimeout(()=>{refreshMatCard(cfg)},300) }
         catch(e) { toast('OCR解析失败','error') }
       } else {
         toast(cfg.name+' 已上传','success')
@@ -426,12 +405,7 @@ async function init(){
   if (mode === 'new') {
     setTimeout(clearAllFields, 50)
   }
-  renderBlUploadCard()
   embedInlineMaterials()
-  // 新建申报：显示上传区域（dropzone选择按钮）
-  if (!curId) {
-    renderBlUploadEmpty()
-  }
   // Load existing declaration
   if(curId){
     try{
@@ -464,7 +438,6 @@ async function init(){
       if(d.netProfit)$('f_netP25').value=d.netProfit
 
       // 加载材料状态
-      refreshBlUploadStatus()
       embedInlineMaterials()
 
       // 恢复完整表单JSON（如果存在）
@@ -521,7 +494,6 @@ function renderForm(){
 <div class="card-title">一、企业基本情况</div>
 
 	<!-- ===== 材料上传卡片（由JS动态渲染） ===== -->
-	<div id="blUploadContainer"></div>
 	<!-- ===== END 材料上传 ===== -->
 
 <div class="form-row"><label>企业名称 <span class="req">*</span></label><input id="f_name" value="${ent?ent.name:'广州测试科技有限公司'}"></div>
@@ -912,290 +884,6 @@ function setAllFieldsReadonly() {
   document.querySelectorAll('input[type=radio], input[type=checkbox]').forEach(el => {
     el.disabled = true
   })
-}
-
-// ===== 材料上传与OCR =====
-let blFile = null
-let blMatId = null  // material record ID for the selected file
-
-// 渲染"营业执照（副本）"上传卡片
-function renderBlUploadCard() {
-  const container = $('blUploadContainer')
-  if (!container) return
-  container.innerHTML = `
-<div class="bl-upload-card">
-  <div class="bl-upload-header">
-    <span class="bl-upload-title">📎 营业执照（副本）识别</span>
-    <span class="bl-upload-badge" id="bl-status-badge"></span>
-  </div>
-  <div class="bl-upload-body" id="blUploadBody">
-  </div>
-</div>`
-}
-
-// 刷新上传卡片状态：MISSING → 展示上传按钮；UPLOADED/IDENTIFIED → 绿色已上传
-async function refreshBlUploadStatus() {
-  const body = $('blUploadBody')
-  if (!body) return
-  if (!curId) {
-    renderBlUploadEmpty()
-    return
-  }
-  try {
-    const mats = await api('GET', '/declarations/' + curId + '/materials')
-    const blMat = mats.find(m => m.materialName === '营业执照（副本）')
-    if (!blMat) { renderBlUploadEmpty(); return }
-    blMatId = blMat.id
-
-    if (blMat.status === 'MISSING') {
-      renderBlUploadEmpty()
-    } else {
-      // UPLOADED / IDENTIFIED — 显示已上传状态
-      body.innerHTML = `
-  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px">
-    <div style="font-size:36px">✅</div>
-    <div style="font-size:14px;font-weight:600;color:#52c41a">营业执照已上传</div>
-    <div style="font-size:12px;color:var(--text2)">状态：${blMat.status === 'IDENTIFIED' ? '已识别' : '已上传'}</div>
-    <div class="bl-preview-actions" style="display:flex;gap:8px">
-      ${blMat.documentId ? '<button class="btn btn-sm btn-outline" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
-      ${mode !== 'view' ? '<button class="btn btn-sm btn-primary" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
-    </div>
-  </div>`
-    }
-  } catch(e) {
-    renderBlUploadEmpty()
-  }
-}
-
-// 未上传状态：拖拽/选择区域
-function renderBlUploadEmpty() {
-  const body = $('blUploadBody')
-  if (!body) return
-  $('bl-status-badge').textContent = '未上传'
-  $('bl-status-badge').className = 'bl-upload-badge'
-  body.innerHTML = `
-    <div class="bl-dropzone" id="bl-dropzone">
-      <div class="bl-dropzone-icon">📄</div>
-      <div class="bl-dropzone-text">点击或拖拽上传营业执照</div>
-      <div class="bl-dropzone-hint">支持 JPG/PNG，不超过 10MB</div>
-      <input type="file" id="bl-file-input" accept=".jpg,.jpeg,.png" hidden>
-    </div>
-    <div class="bl-preview" id="bl-preview" style="display:none">
-      <img id="bl-preview-img" class="bl-preview-img">
-      <div class="bl-preview-actions">
-        <button class="btn btn-sm btn-outline" onclick="resetBlUpload()" type="button">重新选择</button>
-        <button class="btn btn-sm btn-primary" id="blUploadBtn" onclick="startBlUpload()" type="button">📤 上传文件</button>
-      </div>
-    </div>
-    <div class="bl-progress" id="bl-progress" style="display:none">
-      <div class="bl-progress-bar"><div class="bl-progress-fill" id="bl-progress-fill"></div></div>
-      <div class="bl-progress-text" id="bl-progress-text">正在上传...</div>
-    </div>`
-  initBlDropzone()
-}
-
-function renderBlUploadPicker() {
-  renderBlUploadEmpty()
-}
-
-function initBlDropzone() {
-  const dropzone = $('bl-dropzone'), fileInput = $('bl-file-input')
-  if (!dropzone || !fileInput) return
-  dropzone.onclick = () => fileInput.click()
-  fileInput.onchange = (e) => { if (e.target.files.length > 0) handleBlFile(e.target.files[0]) }
-  dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('dragover') }
-  dropzone.ondragleave = () => dropzone.classList.remove('dragover')
-  dropzone.ondrop = (e) => {
-    e.preventDefault(); dropzone.classList.remove('dragover')
-    if (e.dataTransfer.files.length > 0) handleBlFile(e.dataTransfer.files[0])
-  }
-}
-
-function handleBlFile(file) {
-  const validTypes = ['image/jpeg', 'image/png']
-  if (!validTypes.includes(file.type) && !file.name.match(/\.(jpg|jpeg|png)$/i)) {
-    toast('仅支持 JPG 或 PNG 格式', 'error'); return
-  }
-  if (file.size > 10 * 1024 * 1024) {
-    toast('文件大小不能超过 10MB', 'error'); return
-  }
-  blFile = file
-  $('bl-dropzone').style.display = 'none'
-  $('bl-preview').style.display = 'flex'
-  $('bl-progress').style.display = 'none'
-  const reader = new FileReader()
-  reader.onload = (e) => { $('bl-preview-img').src = e.target.result }
-  reader.readAsDataURL(file)
-  $('bl-status-badge').textContent = '已选择'
-  $('bl-status-badge').className = 'bl-upload-badge uploaded'
-}
-
-async function startBlUpload() {
-  if (!blFile) { toast('请先选择营业执照图片', 'error'); return }
-
-  if (!curId) {
-    try {
-      if (!enterpriseId) { toast('缺少企业信息', 'error'); return }
-      const d = collectData()
-      const r = await api('POST', '/declarations', d)
-      curId = r.id
-      $('formStatus').textContent = '\uD83d\udcdd 草稿已自动创建 (ID: ' + r.id + ')'
-      // 等后端初始化材料清单后刷新
-      setTimeout(() => refreshBlUploadStatus(), 300)
-    } catch (e) {
-      toast('自动创建申报失败: ' + (e.message || ''), 'error')
-      return
-    }
-  }
-
-  // 没有 material ID 时先查
-  if (!blMatId) {
-    try {
-      const mats = await api('GET', '/declarations/' + curId + '/materials')
-      const blMat = mats.find(m => m.materialName === '营业执照（副本）')
-      if (blMat) blMatId = blMat.id
-    } catch(e) {}
-  }
-
-  // OCR前自动保存草稿
-  try {
-    const d = collectData()
-    await (curId ? api('PUT', '/declarations/' + curId, d) : api('POST', '/declarations', d).then(r => { curId = r.id; $('formStatus').textContent = '📝 草稿已自动创建 (ID: ' + r.id + ')' }))
-  } catch(e) {
-    toast('自动保存失败', 'error')
-  }
-
-  $('bl-preview').style.display = 'none'
-  $('bl-progress').style.display = 'block'
-  $('bl-progress-fill').style.width = '10%'
-  $('bl-progress-text').textContent = '正在上传...'
-
-  const formData = new FormData()
-  formData.append('file', blFile)
-
-  // 判断用 OCR 还是纯上传
-  const isOcr = $('blUploadBtn')?.textContent?.includes('识别')
-  const url = isOcr
-    ? API + '/declarations/' + curId + '/ocr/business-license'
-    : blMatId
-      ? API + '/declarations/' + curId + '/materials/' + blMatId + '/upload'
-      : API + '/declarations/' + curId + '/ocr/business-license'
-
-  blFile = null
-
-  const xhr = new XMLHttpRequest()
-  xhr.open('POST', url)
-  xhr.timeout = isOcr ? 60000 : 30000
-
-  xhr.upload.onprogress = (e) => {
-    if (e.lengthComputable) {
-      const pct = Math.round((e.loaded / e.total) * 100)
-      $('bl-progress-fill').style.width = Math.min(pct, isOcr ? 50 : 90) + '%'
-    }
-  }
-
-  xhr.onload = function () {
-    if (xhr.status >= 200 && xhr.status < 300) {
-      $('bl-progress-fill').style.width = '100%'
-      $('bl-progress-text').textContent = '\u2705 上传完成'
-
-      if (isOcr) {
-        $('bl-progress-text').textContent = '识别完成，正在填充表单...'
-        const result = JSON.parse(xhr.responseText)
-        setTimeout(() => applyBlOcrResult(result), 300)
-      } else {
-        // 纯上传 — 刷新状态标识
-        setTimeout(() => refreshBlUploadStatus(), 500)
-        toast('营业执照已上传', 'success')
-      }
-    } else {
-      handleOcrError(xhr)
-    }
-  }
-
-  xhr.onerror = () => { $('bl-progress').style.display = 'none'; $('bl-preview').style.display = 'flex'; toast('网络错误，请重试', 'error') }
-  xhr.ontimeout = () => { $('bl-progress').style.display = 'none'; $('bl-preview').style.display = 'flex'; toast(isOcr ? '识别超时，请稍后重试' : '上传超时，请重试', 'error') }
-  xhr.send(formData)
-}
-
-function applyBlOcrResult(data) {
-  $('bl-progress-fill').style.width = '100%'
-  $('bl-progress-text').textContent = '\u2705 识别完成'
-  $('bl-status-badge').textContent = '已识别'
-  $('bl-status-badge').className = 'bl-upload-badge success'
-
-  setTimeout(() => { $('bl-progress').style.display = 'none' }, 800)
-
-  const mapping = [
-    { id: 'f_name', key: 'companyName' },
-    { id: 'f_creditCode', key: 'creditCode' },
-    { id: 'f_legalRep', key: 'legalRepresentative' },
-    { id: 'f_estDate', key: 'establishedDate' },
-    { id: 'f_address', key: 'fullAddress' },
-  ]
-
-  let filled = 0
-  for (const { id, key } of mapping) {
-    const el = $(id), val = data[key]
-    if (el && val && val !== 'null' && val !== '') {
-      el.value = val
-      addOcrBadge(id)
-      filled++
-    }
-  }
-
-  const capEl = $('f_regCapital')
-  if (capEl && data.capitalAmount != null && data.capitalAmount !== 'null') {
-    capEl.value = data.capitalAmount
-    addOcrBadge('f_regCapital')
-    filled++
-  }
-
-  if (data.province && $('f_province')) {
-    const sel = $('f_province')
-    for (const opt of sel.options) {
-      if (opt.value === data.province) { sel.value = data.province; sel.dispatchEvent(new Event('change')); addOcrBadge('f_province'); break }
-    }
-  }
-  if (data.city && $('f_city')) {
-    setTimeout(() => {
-      const sel = $('f_city')
-      for (const opt of sel.options) { if (opt.value === data.city) { sel.value = data.city; sel.dispatchEvent(new Event('change')); addOcrBadge('f_city'); break } }
-    }, 100)
-  }
-  if (data.district && $('f_district')) {
-    setTimeout(() => {
-      for (const opt of $('f_district').options) { if (opt.value === data.district) { $('f_district').value = data.district; addOcrBadge('f_district'); break } }
-    }, 200)
-  }
-
-  // 刷新卡片状态为已上传
-  setTimeout(() => refreshBlUploadStatus(), 600)
-
-  toast('营业执照识别成功，已自动填充 ' + filled + ' 个字段', 'success')
-}
-
-function addOcrBadge(fieldId) {
-  const el = $(fieldId)
-  if (!el) return
-  const existing = el.parentElement.querySelector('.ocr-badge')
-  if (existing) existing.remove()
-  const badge = document.createElement('span')
-  badge.className = 'ocr-badge'
-  badge.textContent = 'OCR \u2713'
-  el.insertAdjacentElement('afterend', badge)
-}
-
-function handleOcrError(xhr) {
-  $('bl-progress').style.display = 'none'
-  $('bl-preview').style.display = 'flex'
-  try { const err = JSON.parse(xhr.responseText); toast(err.message || '操作失败，请重试', 'error') }
-  catch (e) { toast('操作失败 (HTTP ' + xhr.status + ')', 'error') }
-}
-
-function resetBlUpload() {
-  blFile = null
-  renderBlUploadEmpty()
 }
 
 // Init
