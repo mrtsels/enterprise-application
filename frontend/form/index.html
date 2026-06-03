@@ -74,7 +74,6 @@ body{background:#f0f2f5;color:#262626}
 .ocr-badge-future{display:inline-block;font-size:11px;color:#8c8c8c;background:#f5f5f5;border:1px solid #d9d9d9;border-radius:3px;padding:1px 5px;margin-left:6px}
 
 /* Material group headers */
-.mat-group-title{font-size:14px;font-weight:600;margin:14px 0 8px;padding:6px 10px;background:#f0f5ff;border-left:3px solid var(--primary)}
 .mat-card{background:#fafcff;border:1px dashed #d9d9d9;border-radius:8px;margin-bottom:10px;overflow:hidden}
 .mat-card.optional{border-style:dashed;border-color:#e8e8e8}
 .mat-card-header{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#fafafa;border-bottom:1px solid #f0f0f0;flex-wrap:wrap;gap:4px}
@@ -84,6 +83,7 @@ body{background:#f0f2f5;color:#262626}
 .mat-status-badge.selected{background:#e6f7ff;color:#1677ff;border:1px solid #91d5ff}
 .mat-optional-badge{display:inline-block;font-size:11px;color:#8c8c8c;background:#f5f5f5;border:1px solid #d9d9d9;border-radius:3px;padding:1px 5px;margin-left:6px}
 .mat-card-body{padding:12px}
+.inline-materials{margin:10px 0 0;border-top:1px dashed #e8e8e8;padding-top:8px}
 
 @media(max-width:768px){.form-row{flex-direction:column}.form-row>label{min-width:auto}.opt-row{padding-left:0}}
 </style>
@@ -109,7 +109,7 @@ body{background:#f0f2f5;color:#262626}
     <button data-sec="7">七、产业链配套</button>
     <button data-sec="8">八、主导产品领域</button>
     <button data-sec="9">九、其他</button>
-    <button data-sec="10">十、佐证材料</button>
+  </div>
   </div>
 
   <div id="formContent"></div>
@@ -154,31 +154,32 @@ function api(m,p,d){return fetch(API+p,{method:m,headers:{'Content-Type':'applic
 
 // ===== 佐证材料配置 =====
 const MATERIAL_CONFIG = [
-  // 基础资质
-  { name:'营业执照（副本）',            group:'基础资质', required:true, ocr:true,  docTypes:'.jpg,.jpeg,.png', condition:null },
-  { name:'中小企业划型认定证明',        group:'基础资质', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'企业章程（最新版）',          group:'基础资质', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'法定代表人身份证明',          group:'基础资质', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  // 财务指标
-  { name:'近两年财务审计报告',          group:'财务指标', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'近三年研发费用专项审计报告',  group:'财务指标', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'主营业务收入明细表',          group:'财务指标', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'资产负债表（近三年）',        group:'财务指标', required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  // 创新能力
-  { name:'知识产权证书',                group:'创新能力', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'研发机构证明材料',            group:'创新能力', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'研发人员花名册及社保证明',    group:'创新能力', required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'科技成果转化情况说明',        group:'创新能力', required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  // 经营规范
-  { name:'管理体系认证证书',            group:'经营规范', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'数字化水平自测结果截图',      group:'经营规范', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png', condition:null },
-  { name:'信息化系统建设说明',          group:'经营规范', required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'无违法记录承诺函',            group:'经营规范', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'近两年无重大安全/环保事故证明', group:'经营规范', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  // 特色化
-  { name:'自有品牌证明及市场占有率报告',  group:'特色化', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'主导产品细分市场排名证明',      group:'特色化', required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
-  { name:'国家级小巨人补充材料',          group:'特色化', required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:'XIAOJUREN' },
+  // 基础资质 (sec-1)
+  { name:'营业执照（副本）',            group:'基础资质', section:1, required:true, ocr:true,  docTypes:'.jpg,.jpeg,.png', condition:null },
+  { name:'中小企业划型认定证明',        group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'企业章程（最新版）',          group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'法定代表人身份证明',          group:'基础资质', section:1, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  // 财务指标 (sec-2)
+  { name:'近两年财务审计报告',          group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'近三年研发费用专项审计报告',  group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'主营业务收入明细表',          group:'财务指标', section:2, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'资产负债表（近三年）',        group:'财务指标', section:2, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  // 创新能力 (sec-6)
+  { name:'知识产权证书',                group:'创新能力', section:6, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'研发机构证明材料',            group:'创新能力', section:6, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'研发人员花名册及社保证明',    group:'创新能力', section:6, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'科技成果转化情况说明',        group:'创新能力', section:6, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  // 经营规范 (sec-4 精细化)
+  { name:'管理体系认证证书',            group:'经营规范', section:4, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'数字化水平自测结果截图',      group:'经营规范', section:4, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png', condition:null },
+  { name:'信息化系统建设说明',          group:'经营规范', section:4, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  // 经营规范 (sec-7 产业链配套 — 承诺函/安环证明在此处最自然)
+  { name:'无违法记录承诺函',            group:'经营规范', section:7, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'近两年无重大安全/环保事故证明', group:'经营规范', section:7, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  // 特色化 (sec-5)
+  { name:'自有品牌证明及市场占有率报告',  group:'特色化', section:5, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'主导产品细分市场排名证明',      group:'特色化', section:5, required:false, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:null },
+  { name:'国家级小巨人补充材料',          group:'特色化', section:5, required:true, ocr:false, docTypes:'.jpg,.jpeg,.png,.pdf', condition:'XIAOJUREN' },
 ]
 const uploadState = {} // keyed by materialName: { file, materialId }
 
@@ -207,93 +208,83 @@ async function ensureDeclarationCreated() {
   return curId
 }
 
-// 加载并渲染第10节所有材料上传卡片
-async function renderMaterialUploadSection() {
-  const container = $('materialUploadContainer')
-  if (!container) return
-  container.innerHTML = '<div style="padding:12px;text-align:center;color:#8c8c8c;font-size:13px">加载材料清单...</div>'
-
+// 加载并渲染内联材料上传卡片到各节橱窗
+async function embedInlineMaterials() {
   let mats = []
   if (curId) {
     try { mats = await api('GET','/declarations/'+curId+'/materials') } catch(e) {}
   }
-
   const visible = getVisibleMaterials()
-  const groups = [...new Set(visible.map(c => c.group))]
-
-  let html = ''
-  for (const group of groups) {
-    const items = visible.filter(c => c.group === group)
-    html += '<div class="mat-group-title">' + group + '</div>'
+  // 按 section 分组
+  const bySec = {}
+  for (const cfg of visible) {
+    const sec = cfg.section || 1
+    if (!bySec[sec]) bySec[sec] = []
+    bySec[sec].push(cfg)
+  }
+  // 填充每个节的容器
+  for (let s = 1; s <= 9; s++) {
+    const container = document.getElementById('inline-mats-'+s)
+    if (!container) continue
+    const items = bySec[s] || []
+    if (!items.length) { container.style.display = 'none'; continue }
+    container.style.display = ''
+    let html = ''
     for (const cfg of items) {
       const mat = mats.find(m => m.materialName === cfg.name)
-      html += renderUploadCardHTML(cfg, mat)
+      html += renderInlineMatCard(cfg, mat)
     }
+    container.innerHTML = html
   }
-  container.innerHTML = html
-  // 初始化所有 dropzone
-  initAllMatDropzones()
+  initInlineMatDropzones()
 }
 
 function matIdx(name) { return MATERIAL_CONFIG.findIndex(c => c.name === name) }
 
-// 渲染单个材料上传卡片 HTML
-function renderUploadCardHTML(cfg, mat) {
+function renderInlineMatCard(cfg, mat) {
   const idx = matIdx(cfg.name)
   const isUploaded = mat && mat.status !== 'MISSING'
-  const statusLabel = isUploaded ? (mat.status === 'IDENTIFIED' ? '已识别' : '已上传') : '未上传'
-  const statusCls = isUploaded ? 'uploaded' : ''
-  const optionalCls = cfg.required ? '' : ' optional'
   const hasFile = uploadState[cfg.name] && uploadState[cfg.name].file
+  const status = isUploaded ? (mat.status==='IDENTIFIED'?'已识别':'已上传') : '未上传'
+  const statusCls = isUploaded ? 'uploaded' : ''
 
   return `
-<div class="mat-card${optionalCls}" data-mat-name="${cfg.name}" data-mat-id="${mat?mat.id:''}">
-  <div class="mat-card-header">
-    <span class="mat-card-title">
+<div class="mat-card${cfg.required?'':' optional'}" data-mat-name="${cfg.name}" data-mat-id="${mat?mat.id:''}" style="margin-bottom:6px">
+  <div class="mat-card-header" style="padding:5px 10px">
+    <span style="font-size:12px;font-weight:600">
       ${cfg.name}
       ${!cfg.required?'<span class="mat-optional-badge">选交</span>':''}
-      ${cfg.ocr?'<span class="ocr-badge-future">OCR</span>':'<span class="ocr-badge-future">识别条件预留</span>'}
+      ${cfg.ocr?'<span class="ocr-badge-future" style="font-size:10px">OCR</span>':'<span class="ocr-badge-future" style="font-size:10px">识别条件预留</span>'}
     </span>
-    <span class="mat-status-badge ${statusCls}">${statusLabel}</span>
+    <span>
+      <span class="mat-status-badge ${statusCls}" style="font-size:10px;padding:1px 6px">${status}</span>
+      ${isUploaded && !hasFile ? `<button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="reuploadMaterial(${idx})" type="button">🔄 重新上传</button>` : ''}
+    </span>
   </div>
-  <div class="mat-card-body" id="mat-body-${idx}">
+  <div class="mat-card-body" style="padding:6px 10px" id="mat-body-${idx}">
     ${isUploaded && !hasFile ? renderMatUploadedState(cfg, mat, idx) : renderMatDropzone(cfg, idx)}
   </div>
 </div>`
 }
 
 function renderMatUploadedState(cfg, mat, idx) {
-  return `
-<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px">
-  <div style="font-size:32px">✅</div>
-  <div style="font-size:13px;font-weight:600;color:#52c41a">${cfg.name} 已上传</div>
-  <div style="font-size:12px;color:var(--text2)">状态：${mat.status === 'IDENTIFIED' ? '已识别' : '已上传'}</div>
-  <button class="btn btn-sm btn-primary" onclick="reuploadMaterial(${idx})" type="button">🔄 重新上传</button>
-</div>`
+  return `<div style="display:flex;align-items:center;gap:8px"><div style="font-size:20px">✅</div><div style="font-size:12px;color:#52c41a">${cfg.name} 已上传</div></div>`
 }
 
 function renderMatDropzone(cfg, idx) {
   const hasFile = uploadState[cfg.name] && uploadState[cfg.name].file
   if (hasFile) {
-    return `
-<div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding:4px">
-  <div style="font-size:13px;color:#262626">已选择文件：${uploadState[cfg.name].file.name}</div>
-  <div style="display:flex;gap:8px">
-    <button class="btn btn-sm btn-outline" onclick="cancelMatUpload(${idx})" type="button">重新选择</button>
-    <button class="btn btn-sm btn-primary" onclick="startMatUpload(${idx})" type="button">📤 上传文件</button>
-  </div>
-</div>`
+    return `<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:12px">已选择：${uploadState[cfg.name].file.name}</span>
+      <button class="btn btn-sm" style="padding:2px 8px;font-size:11px" onclick="cancelMatUpload(${idx})" type="button">重新选择</button>
+      <button class="btn btn-sm btn-primary" style="padding:2px 8px;font-size:11px" onclick="startMatUpload(${idx})" type="button">📤 上传</button></div>`
   }
-  return `
-<div class="bl-dropzone mat-dropzone" id="mat-dz-${idx}">
-  <div class="bl-dropzone-icon">📄</div>
-  <div class="bl-dropzone-text">点击或拖拽上传${cfg.name}</div>
-  <div class="bl-dropzone-hint">支持 ${cfg.docTypes}，不超过 10MB</div>
-  <input type="file" id="mat-fi-${idx}" accept="${cfg.docTypes}" hidden>
-</div>`
+  return `<div class="bl-dropzone mat-dropzone" id="mat-dz-${idx}" style="padding:8px;border-width:1px">
+    <div style="font-size:12px">📄 点击或拖拽上传${cfg.name}</div>
+    <div style="font-size:11px;color:#8c8c8c">支持 ${cfg.docTypes}，不超过10MB</div>
+    <input type="file" id="mat-fi-${idx}" accept="${cfg.docTypes}" hidden></div>`
 }
 
-function initAllMatDropzones() {
+function initInlineMatDropzones() {
   const visible = getVisibleMaterials()
   for (const cfg of visible) {
     const idx = matIdx(cfg.name)
@@ -433,7 +424,7 @@ async function init(){
     setTimeout(clearAllFields, 50)
   }
   renderBlUploadCard()
-  renderMaterialUploadSection()
+  embedInlineMaterials()
   // 新建申报：显示上传区域（dropzone选择按钮）
   if (!curId) {
     renderBlUploadEmpty()
@@ -471,7 +462,7 @@ async function init(){
 
       // 加载材料状态
       refreshBlUploadStatus()
-      renderMaterialUploadSection()
+      embedInlineMaterials()
 
       // 恢复完整表单JSON（如果存在）
       if (d.formData) {
@@ -595,6 +586,7 @@ function renderForm(){
 <label><input type="radio" name="f_listingPlace" value="深交所创业板"> 创业板</label>
 <label><input type="radio" name="f_listingPlace" value="北交所"> 北交所</label>
 <label><input type="radio" name="f_listingPlace" value="境外"> 境外</label></div></div></div>
+<div class="inline-materials" id="inline-mats-1"></div>
 </div>
 
 <div class="card sec-pane" id="sec-2">
@@ -624,6 +616,7 @@ function renderForm(){
 <div class="sec-sub">融资计划</div>
 <div class="form-row"><label>资金需求额</label><input id="f_fundReq" type="number" style="max-width:130px" value="3000"><span class="note">万元</span></div>
 <div class="opt-row"><label>计划融资方式</label><div class="og"><label><input type="checkbox" checked> 银行贷款</label><label><input type="checkbox" checked> 股权融资</label><label><input type="checkbox"> 债券融资</label><label><input type="checkbox"> 上市融资</label><label><input type="checkbox"> 其他</label></div></div>
+<div class="inline-materials" id="inline-mats-2"></div>
 </div>
 
 <div class="card sec-pane" id="sec-3">
@@ -677,6 +670,7 @@ function renderForm(){
 <div class="opt-row"><label>是否拥有制造业与互联网融合试点示范项目</label><div class="og"><label><input type="radio" name="f_internetDemo" value="true"> 是</label><label><input type="radio" name="f_internetDemo" value="false" checked> 否</label></div></div>
 <div class="sec-sub">财务指标</div>
 <div class="form-row"><label>企业资产负债率</label><input id="f_debtRatio" type="number" step="0.1" style="max-width:100px" value="35.2" readonly><span class="note">%（系统自动计算）</span></div>
+<div class="inline-materials" id="inline-mats-4"></div>
 </div>
 
 <div class="card sec-pane" id="sec-5">
@@ -692,6 +686,7 @@ function renderForm(){
 <div class="sec-sub">2025年主导产品全国细分市场占有率情况介绍</div>
 <div class="form-row"><label style="min-width:130px">情况介绍<br><span style="font-size:11px;color:var(--text2)">1000字以内</span></label>
 <textarea id="f_msDesc" rows="3" placeholder="1.界定细分市场范围。2.介绍细分市场规模。3.介绍本企业占有率情况。">公司在华南地区智能测试细分市场占有率约6.1%，位居行业前三。</textarea></div>
+<div class="inline-materials" id="inline-mats-5"></div>
 </div>
 
 <div class="card sec-pane" id="sec-6">
@@ -727,6 +722,7 @@ function renderForm(){
 <div class="opt-row"><label>近3年进入"创客中国"全国50强</label><div class="og">
 <label><input type="radio" name="f_chuangke" value="false" checked onchange="$('f_ckYear').disabled=this.value!='true'"> 否</label>
 <label><input type="radio" name="f_chuangke" value="true" onchange="$('f_ckYear').disabled=this.value!='true'"> 是，年份 <input id="f_ckYear" style="width:70px;padding:2px 5px;border:1px solid var(--border);border-radius:4px" value="2024" disabled></label></div></div>
+<div class="inline-materials" id="inline-mats-6"></div>
 </div>
 
 <div class="card sec-pane" id="sec-7">
@@ -741,6 +737,7 @@ function renderForm(){
 <div class="opt-row"><label>主导产品是否为知名大企业直接配套</label><div class="og"><label><input type="radio" name="f_directSupply" value="false"> 否</label><label><input type="radio" name="f_directSupply" value="true" checked> 是</label></div></div>
 <div class="form-row"><label>配套企业</label><input id="f_sup1" style="flex:1" value="华为技术"><input id="f_sup2" style="flex:1" value="中国银行"><input id="f_sup3" style="flex:1" value="南方电网"></div>
 <div class="form-row"><label>行业领军企业（3个以内）</label><input id="f_lead1" style="flex:1" value="中国电子科技集团"><input id="f_lead2" style="flex:1" value="中软国际"><input id="f_lead3" style="flex:1"></div>
+<div class="inline-materials" id="inline-mats-7"></div>
 </div>
 
 <div class="card sec-pane" id="sec-8">
@@ -788,12 +785,6 @@ function renderForm(){
 
 三、属于工业稳增长和转型升级成效明显市（州）内企业。</textarea></div>
 <div class="opt-row" style="padding-left:0;margin-top:8px"><label style="font-size:13px"><input type="checkbox" id="f_declaration" checked> 以上所填内容和提交资料均准确、真实、合法、有效、无涉密信息，本企业愿为此承担有关责任。</label></div>
-</div>
-
-<div class="card sec-pane" id="sec-10">
-<div class="card-title">十、佐证材料上传</div>
-<p style="font-size:13px;color:#8c8c8c;margin-bottom:12px">请上传各申报材料的证明文件，支持 JPG/PNG/PDF 格式，单文件不超过10MB。</p>
-<div id="materialUploadContainer"></div>
 </div>`
 }
 
