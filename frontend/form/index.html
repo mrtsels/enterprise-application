@@ -144,6 +144,10 @@ async function init(){
     try{ent=await api('GET','/enterprises/'+enterpriseId);$('headerName').textContent=ent.name}catch(e){}
   }
   renderForm()
+  // 新建申报：清空所有演示数据字段
+  if (mode === 'new') {
+    setTimeout(clearAllFields, 50)
+  }
   initBlUpload()
   // Load existing declaration
   if(curId){
@@ -515,6 +519,25 @@ function resetForm(){
   toast('已重置')
 }
 
+function clearAllFields() {
+  document.querySelectorAll('input, select, textarea').forEach(el => {
+    if (el.type === 'radio' || el.type === 'checkbox') {
+      el.checked = el.defaultChecked
+      // 清空 checked：去掉 defaultChecked（演示模式默认打勾的也清掉）
+      el.checked = false
+    } else if (el.type === 'number') {
+      el.value = ''
+    } else if (el.tagName === 'SELECT') {
+      el.selectedIndex = 0
+    } else if (!el.readOnly) {
+      el.value = ''
+    }
+  })
+  // 清空 label/span 类的文本值（如资产负债率只读字段）
+  const debtEl = $('f_debtRatio')
+  if (debtEl) debtEl.value = ''
+}
+
 // ===== Business License OCR =====
 let blFile = null
 
@@ -550,9 +573,22 @@ function handleBlFile(file) {
   $('bl-status-badge').className = 'bl-upload-badge uploaded'
 }
 
-function startBlOcr() {
+async function startBlOcr() {
   if (!blFile) { toast('请先选择营业执照图片', 'error'); return }
-  if (!curId) { toast('请先保存申报草稿', 'error'); return }
+
+  // 自动创建申报草稿（如尚未保存）
+  if (!curId) {
+    try {
+      if (!enterpriseId) { toast('缺少企业信息', 'error'); return }
+      const d = collectData()
+      const r = await api('POST', '/declarations', d)
+      curId = r.id
+      $('formStatus').textContent = '📝 草稿已自动创建 (ID: ' + r.id + ')'
+    } catch (e) {
+      toast('自动创建申报失败: ' + (e.message || ''), 'error')
+      return
+    }
+  }
 
   $('bl-preview').style.display = 'none'
   $('bl-progress').style.display = 'block'
