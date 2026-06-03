@@ -148,7 +148,7 @@ async function init(){
   if (mode === 'new') {
     setTimeout(clearAllFields, 50)
   }
-  initBlUpload()
+  renderBlUploadCard()
   // Load existing declaration
   if(curId){
     try{
@@ -178,6 +178,9 @@ async function init(){
       if(d.revenueGrowth2yAvg)$('f_revGrowth2y').value=d.revenueGrowth2yAvg
       if(d.debtRatio)$('f_debt25').value=d.debtRatio
       if(d.netProfit)$('f_netP25').value=d.netProfit
+
+      // 加载营业执照材料状态
+      refreshBlUploadStatus()
     }catch(e){toast('加载申报数据失败','error')}
 
     // 查看模式：锁定所有字段，隐藏操作按钮
@@ -186,9 +189,6 @@ async function init(){
       // 锁定底部工具栏
       const bar = document.querySelector('.bottom-bar')
       if (bar) bar.style.display = 'none'
-      // 隐藏OCR区域
-      const blCard = document.querySelector('.bl-upload-card')
-      if (blCard) blCard.style.display = 'none'
     }
   }else{
     $('formStatus').textContent='📝 新建预申报'
@@ -201,36 +201,9 @@ function renderForm(){
 <div class="card sec-pane active" id="sec-1">
 <div class="card-title">一、企业基本情况</div>
 
-<!-- ===== Business License OCR Upload ===== -->
-<div class="bl-upload-card">
-  <div class="bl-upload-header">
-    <span class="bl-upload-title">📎 营业执照（副本）识别</span>
-    <span class="bl-upload-badge" id="bl-status-badge">未上传</span>
-  </div>
-  <div class="bl-upload-body">
-    <!-- Drop zone -->
-    <div class="bl-dropzone" id="bl-dropzone">
-      <div class="bl-dropzone-icon">📄</div>
-      <div class="bl-dropzone-text">点击或拖拽上传营业执照</div>
-      <div class="bl-dropzone-hint">支持 JPG/PNG，不超过 10MB</div>
-      <input type="file" id="bl-file-input" accept=".jpg,.jpeg,.png" hidden>
-    </div>
-    <!-- Preview -->
-    <div class="bl-preview" id="bl-preview" style="display:none">
-      <img id="bl-preview-img" class="bl-preview-img">
-      <div class="bl-preview-actions">
-        <button class="btn btn-sm btn-outline" onclick="resetBlUpload()" type="button">重新选择</button>
-        <button class="btn btn-sm btn-primary" onclick="startBlOcr()" type="button">🔍 识别营业执照</button>
-      </div>
-    </div>
-    <!-- Progress -->
-    <div class="bl-progress" id="bl-progress" style="display:none">
-      <div class="bl-progress-bar"><div class="bl-progress-fill" id="bl-progress-fill"></div></div>
-      <div class="bl-progress-text" id="bl-progress-text">正在上传并识别...</div>
-    </div>
-  </div>
-</div>
-<!-- ===== END NEW ===== -->
+	<!-- ===== 材料上传卡片（由JS动态渲染） ===== -->
+	<div id="blUploadContainer"></div>
+	<!-- ===== END 材料上传 ===== -->
 
 <div class="form-row"><label>企业名称 <span class="req">*</span></label><input id="f_name" value="${ent?ent.name:'广州测试科技有限公司'}"></div>
 <div class="form-row"><label>统一社会信用代码</label><input id="f_creditCode" value="91440101MA5XXXXXXX"></div>
@@ -589,10 +562,90 @@ function setAllFieldsReadonly() {
   })
 }
 
-// ===== Business License OCR =====
+// ===== 材料上传与OCR =====
 let blFile = null
+let blMatId = null  // material record ID for the selected file
 
-function initBlUpload() {
+// 渲染"营业执照（副本）"上传卡片
+function renderBlUploadCard() {
+  const container = $('blUploadContainer')
+  if (!container) return
+  container.innerHTML = `
+<div class="bl-upload-card">
+  <div class="bl-upload-header">
+    <span class="bl-upload-title">📎 营业执照（副本）识别</span>
+    <span class="bl-upload-badge" id="bl-status-badge"></span>
+  </div>
+  <div class="bl-upload-body" id="blUploadBody">
+  </div>
+</div>`
+}
+
+// 刷新上传卡片状态：MISSING → 展示上传按钮；UPLOADED/IDENTIFIED → 绿色已上传
+async function refreshBlUploadStatus() {
+  const body = $('blUploadBody')
+  if (!body || !curId) {
+    renderBlUploadEmpty()
+    return
+  }
+  try {
+    const mats = await api('GET', '/declarations/' + curId + '/materials')
+    const blMat = mats.find(m => m.materialName === '营业执照（副本）')
+    if (!blMat) { renderBlUploadEmpty(); return }
+    blMatId = blMat.id
+
+    if (blMat.status === 'MISSING') {
+      renderBlUploadEmpty()
+    } else {
+      // UPLOADED / IDENTIFIED — 显示已上传状态
+      body.innerHTML = \`
+  <div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px">
+    <div style="font-size:36px">✅</div>
+    <div style="font-size:14px;font-weight:600;color:#52c41a">营业执照已上传</div>
+    <div style="font-size:12px;color:var(--text2)">状态：\${blMat.status === 'IDENTIFIED' ? '已识别' : '已上传'}</div>
+    <div class="bl-preview-actions" style="display:flex;gap:8px">
+      \${blMat.documentId ? '<button class="btn btn-sm btn-outline" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
+      \${mode !== 'view' ? '<button class="btn btn-sm btn-primary" onclick="renderBlUploadPicker()" type="button">🔄 重新上传</button>' : ''}
+    </div>
+  </div>\`
+    }
+  } catch(e) {
+    renderBlUploadEmpty()
+  }
+}
+
+// 未上传状态：拖拽/选择区域
+function renderBlUploadEmpty() {
+  const body = $('blUploadBody')
+  if (!body) return
+  $('bl-status-badge').textContent = '未上传'
+  $('bl-status-badge').className = 'bl-upload-badge'
+  body.innerHTML = \`
+    <div class="bl-dropzone" id="bl-dropzone">
+      <div class="bl-dropzone-icon">📄</div>
+      <div class="bl-dropzone-text">点击或拖拽上传营业执照</div>
+      <div class="bl-dropzone-hint">支持 JPG/PNG，不超过 10MB</div>
+      <input type="file" id="bl-file-input" accept=".jpg,.jpeg,.png" hidden>
+    </div>
+    <div class="bl-preview" id="bl-preview" style="display:none">
+      <img id="bl-preview-img" class="bl-preview-img">
+      <div class="bl-preview-actions">
+        <button class="btn btn-sm btn-outline" onclick="resetBlUpload()" type="button">重新选择</button>
+        <button class="btn btn-sm btn-primary" id="blUploadBtn" onclick="startBlUpload()" type="button">📤 上传文件</button>
+      </div>
+    </div>
+    <div class="bl-progress" id="bl-progress" style="display:none">
+      <div class="bl-progress-bar"><div class="bl-progress-fill" id="bl-progress-fill"></div></div>
+      <div class="bl-progress-text" id="bl-progress-text">正在上传...</div>
+    </div>\`
+  initBlDropzone()
+}
+
+function renderBlUploadPicker() {
+  renderBlUploadEmpty()
+}
+
+function initBlDropzone() {
   const dropzone = $('bl-dropzone'), fileInput = $('bl-file-input')
   if (!dropzone || !fileInput) return
   dropzone.onclick = () => fileInput.click()
@@ -624,21 +677,31 @@ function handleBlFile(file) {
   $('bl-status-badge').className = 'bl-upload-badge uploaded'
 }
 
-async function startBlOcr() {
+async function startBlUpload() {
   if (!blFile) { toast('请先选择营业执照图片', 'error'); return }
 
-  // 自动创建申报草稿（如尚未保存）
   if (!curId) {
     try {
       if (!enterpriseId) { toast('缺少企业信息', 'error'); return }
       const d = collectData()
       const r = await api('POST', '/declarations', d)
       curId = r.id
-      $('formStatus').textContent = '📝 草稿已自动创建 (ID: ' + r.id + ')'
+      $('formStatus').textContent = '\uD83d\udcdd 草稿已自动创建 (ID: ' + r.id + ')'
+      // 等后端初始化材料清单后刷新
+      setTimeout(() => refreshBlUploadStatus(), 300)
     } catch (e) {
       toast('自动创建申报失败: ' + (e.message || ''), 'error')
       return
     }
+  }
+
+  // 没有 material ID 时先查
+  if (!blMatId) {
+    try {
+      const mats = await api('GET', '/declarations/' + curId + '/materials')
+      const blMat = mats.find(m => m.materialName === '营业执照（副本）')
+      if (blMat) blMatId = blMat.id
+    } catch(e) {}
   }
 
   $('bl-preview').style.display = 'none'
@@ -649,57 +712,59 @@ async function startBlOcr() {
   const formData = new FormData()
   formData.append('file', blFile)
 
+  // 判断用 OCR 还是纯上传
+  const isOcr = $('blUploadBtn')?.textContent?.includes('识别')
+  const url = isOcr
+    ? API + '/declarations/' + curId + '/ocr/business-license'
+    : blMatId
+      ? API + '/declarations/' + curId + '/materials/' + blMatId + '/upload'
+      : API + '/declarations/' + curId + '/ocr/business-license'
+
+  blFile = null
+
   const xhr = new XMLHttpRequest()
-  xhr.open('POST', API + '/declarations/' + curId + '/ocr/business-license')
-  xhr.timeout = 60000 // 60 seconds for OCR
+  xhr.open('POST', url)
+  xhr.timeout = isOcr ? 60000 : 30000
 
   xhr.upload.onprogress = (e) => {
     if (e.lengthComputable) {
       const pct = Math.round((e.loaded / e.total) * 100)
-      $('bl-progress-fill').style.width = Math.min(pct, 50) + '%'
+      $('bl-progress-fill').style.width = Math.min(pct, isOcr ? 50 : 90) + '%'
     }
-  }
-
-  xhr.onloadstart = function () {
-    $('bl-progress-text').textContent = '正在上传...'
   }
 
   xhr.onload = function () {
     if (xhr.status >= 200 && xhr.status < 300) {
       $('bl-progress-fill').style.width = '100%'
-      $('bl-progress-text').textContent = '识别完成，正在填充表单...'
-      const result = JSON.parse(xhr.responseText)
-      setTimeout(() => applyBlOcrResult(result), 300)
-    } else { handleOcrError(xhr) }
+      $('bl-progress-text').textContent = '\u2705 上传完成'
+
+      if (isOcr) {
+        $('bl-progress-text').textContent = '识别完成，正在填充表单...'
+        const result = JSON.parse(xhr.responseText)
+        setTimeout(() => applyBlOcrResult(result), 300)
+      } else {
+        // 纯上传 — 刷新状态标识
+        setTimeout(() => refreshBlUploadStatus(), 500)
+        toast('营业执照已上传', 'success')
+      }
+    } else {
+      handleOcrError(xhr)
+    }
   }
 
-  xhr.onerror = () => {
-    $('bl-progress').style.display = 'none'
-    $('bl-preview').style.display = 'flex'
-    toast('网络错误，请重试', 'error')
-  }
-
-  xhr.ontimeout = () => {
-    $('bl-progress').style.display = 'none'
-    $('bl-preview').style.display = 'flex'
-    toast('识别超时，请稍后重试', 'error')
-  }
-
+  xhr.onerror = () => { $('bl-progress').style.display = 'none'; $('bl-preview').style.display = 'flex'; toast('网络错误，请重试', 'error') }
+  xhr.ontimeout = () => { $('bl-progress').style.display = 'none'; $('bl-preview').style.display = 'flex'; toast(isOcr ? '识别超时，请稍后重试' : '上传超时，请重试', 'error') }
   xhr.send(formData)
 }
 
 function applyBlOcrResult(data) {
   $('bl-progress-fill').style.width = '100%'
-  $('bl-progress-text').textContent = '✅ 识别完成'
+  $('bl-progress-text').textContent = '\u2705 识别完成'
   $('bl-status-badge').textContent = '已识别'
   $('bl-status-badge').className = 'bl-upload-badge success'
 
-  setTimeout(() => {
-    $('bl-progress').style.display = 'none'
-    $('bl-preview').style.display = 'flex'
-  }, 800)
+  setTimeout(() => { $('bl-progress').style.display = 'none' }, 800)
 
-  // Field mapping: OCR JSON key → form field ID
   const mapping = [
     { id: 'f_name', key: 'companyName' },
     { id: 'f_creditCode', key: 'creditCode' },
@@ -718,7 +783,6 @@ function applyBlOcrResult(data) {
     }
   }
 
-  // Registered capital (number)
   const capEl = $('f_regCapital')
   if (capEl && data.capitalAmount != null && data.capitalAmount !== 'null') {
     capEl.value = data.capitalAmount
@@ -726,35 +790,26 @@ function applyBlOcrResult(data) {
     filled++
   }
 
-  // Province select
   if (data.province && $('f_province')) {
     const sel = $('f_province')
     for (const opt of sel.options) {
-      if (opt.value === data.province) {
-        sel.value = data.province
-        sel.dispatchEvent(new Event('change'))
-        addOcrBadge('f_province')
-        break
-      }
+      if (opt.value === data.province) { sel.value = data.province; sel.dispatchEvent(new Event('change')); addOcrBadge('f_province'); break }
     }
   }
-  // City select (after province change populates cities)
   if (data.city && $('f_city')) {
     setTimeout(() => {
       const sel = $('f_city')
-      for (const opt of sel.options) {
-        if (opt.value === data.city) { sel.value = data.city; sel.dispatchEvent(new Event('change')); addOcrBadge('f_city'); break }
-      }
+      for (const opt of sel.options) { if (opt.value === data.city) { sel.value = data.city; sel.dispatchEvent(new Event('change')); addOcrBadge('f_city'); break } }
     }, 100)
   }
-  // District select (after city change populates districts)
   if (data.district && $('f_district')) {
     setTimeout(() => {
-      for (const opt of $('f_district').options) {
-        if (opt.value === data.district) { $('f_district').value = data.district; addOcrBadge('f_district'); break }
-      }
+      for (const opt of $('f_district').options) { if (opt.value === data.district) { $('f_district').value = data.district; addOcrBadge('f_district'); break } }
     }, 200)
   }
+
+  // 刷新卡片状态为已上传
+  setTimeout(() => refreshBlUploadStatus(), 600)
 
   toast('营业执照识别成功，已自动填充 ' + filled + ' 个字段', 'success')
 }
@@ -766,29 +821,20 @@ function addOcrBadge(fieldId) {
   if (existing) existing.remove()
   const badge = document.createElement('span')
   badge.className = 'ocr-badge'
-  badge.textContent = 'OCR ✓'
+  badge.textContent = 'OCR \u2713'
   el.insertAdjacentElement('afterend', badge)
 }
 
 function handleOcrError(xhr) {
   $('bl-progress').style.display = 'none'
   $('bl-preview').style.display = 'flex'
-  try {
-    const err = JSON.parse(xhr.responseText)
-    toast(err.message || '识别失败，请重试', 'error')
-  } catch (e) {
-    toast('识别失败 (HTTP ' + xhr.status + ')', 'error')
-  }
+  try { const err = JSON.parse(xhr.responseText); toast(err.message || '操作失败，请重试', 'error') }
+  catch (e) { toast('操作失败 (HTTP ' + xhr.status + ')', 'error') }
 }
 
 function resetBlUpload() {
   blFile = null
-  $('bl-dropzone').style.display = 'block'
-  $('bl-preview').style.display = 'none'
-  $('bl-progress').style.display = 'none'
-  $('bl-status-badge').textContent = '未上传'
-  $('bl-status-badge').className = 'bl-upload-badge'
-  $('bl-file-input').value = ''
+  renderBlUploadEmpty()
 }
 
 // Init

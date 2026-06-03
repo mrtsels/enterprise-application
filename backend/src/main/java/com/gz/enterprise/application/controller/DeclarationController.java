@@ -121,4 +121,14 @@ public class DeclarationController {
             @RequestParam("file") MultipartFile file) {
         return declarationService.recognizeBusinessLicense(file, id);
     }
+
+    // ==================== 材料文件上传 ====================
+
+    @PostMapping("/{id}/materials/{materialId}/upload")
+    public DeclarationMaterial uploadMaterial(
+            @PathVariable Long id,
+            @PathVariable Long materialId,
+            @RequestParam("file") MultipartFile file) {
+        return declarationService.uploadMaterialFile(id, materialId, file);
+    }
 }

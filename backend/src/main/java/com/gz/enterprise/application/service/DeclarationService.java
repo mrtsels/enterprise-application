@@ -24,6 +24,7 @@ public class DeclarationService {
     private final DeclarationRepository declarationRepo;
     private final DeclarationMaterialRepository materialRepo;
     private final OcrService ocrService;
+    private final FileStorageService fileStorageService;
 
     // ==================== 申报项目 CRUD ====================
 
@@ -480,6 +481,23 @@ public class DeclarationService {
                 .orElseThrow(() -> new IllegalArgumentException("未找到营业执照材料记录，请先创建申报"));
 
         return ocrService.recognize(file, declarationId, blMaterial.getId(), declaration.getEnterpriseId(), blMaterial.getMaterialName());
+    }
+
+    /**
+     * 上传材料文件（仅保存文件到 document，更新 material 状态，不触发 OCR）
+     */
+    @Transactional
+    public DeclarationMaterial uploadMaterialFile(Long declarationId, Long materialId, MultipartFile file) {
+        Declaration declaration = get(declarationId);
+        DeclarationMaterial material = materialRepo.findById(materialId)
+                .orElseThrow(() -> new IllegalArgumentException("材料不存在"));
+
+        String category = material.getMaterialType();
+        Document doc = fileStorageService.store(file, declaration.getEnterpriseId(), declarationId, category);
+
+        material.setDocumentId(doc.getId());
+        material.setStatus("UPLOADED");
+        return materialRepo.save(material);
     }
 
     public List<DeclarationMaterial> listMaterials(Long declarationId) {
