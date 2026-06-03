@@ -160,4 +160,22 @@ public class Declaration extends BaseEntity {
     private Integer professionalScore;              // 专业化指标得分
     private Boolean declarationEligible;            // 是否符合申报条件
     private String eligibleReason;                  // 条件说明
+
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String formData;                        // 完整表单JSON数据
+
+    private String creditCode;                      // 统一社会信用代码
+    private String legalRepresentative;             // 法定代表人
+    private String estDate;                         // 注册时间
+    private String fullAddress;                     // 通讯地址
+    private Double registeredCapital;               // 注册资本（万元）
+    private String province;
+    private String city;
+    private String district;
+    private String contactPerson;                   // 联系人
+    private String contactPhone;                    // 电话
+    private String contactMobile;                   // 手机
+    private String email;
+    private Long employees;                         // 全职员工数量
+    private Long rdStaffCount;                      // 研发人员数量
 }

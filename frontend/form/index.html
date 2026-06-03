@@ -181,6 +181,26 @@ async function init(){
 
       // 加载营业执照材料状态
       refreshBlUploadStatus()
+
+      // 恢复完整表单JSON（如果存在）
+      if (d.formData) {
+        try {
+          const fd = JSON.parse(d.formData)
+          for (const [id, val] of Object.entries(fd)) {
+            const el = $(id)
+            if (!el) continue
+            if (el.type === 'radio') {
+              document.querySelectorAll(`input[name="${id}"]`).forEach(r => { r.checked = r.value === val })
+            } else if (el.type === 'checkbox') {
+              el.checked = val === true || val === 'true'
+            } else if (el.tagName === 'SELECT') {
+              setSel(id, val)
+            } else {
+              el.value = val
+            }
+          }
+        } catch(e) { /* ignore parse errors */ }
+      }
     }catch(e){toast('加载申报数据失败','error')}
 
     // 查看模式：锁定所有字段，隐藏操作按钮
@@ -476,6 +496,23 @@ document.querySelectorAll('.sec-nav button').forEach(b=>b.onclick=function(){
 // ===== Form operations =====
 function g(id){const e=$(id);if(!e)return null;if(e.type==='checkbox')return e.checked;if(e.type==='number')return e.value?Number(e.value):null;return e.value}
 
+// 收集表单全部字段（用于持久化和保存到后端）
+function collectAllFormData() {
+  const data = {}
+  document.querySelectorAll('.sec-pane input, .sec-pane select, .sec-pane textarea').forEach(el => {
+    if (el.type === 'radio') {
+      if (el.checked) data[el.name] = el.value
+    } else if (el.type === 'checkbox') {
+      data[el.id || el.name] = el.checked
+    } else if (el.tagName === 'SELECT') {
+      data[el.id] = el.value
+    } else if (el.type !== 'file') {
+      data[el.id] = el.value
+    }
+  })
+  return data
+}
+
 function collectData(){return{
   enterpriseId:enterpriseId,enterpriseName:ent?ent.name:'',
   type:'XIAOJUREN',level:'国家级',category:'认定',year:2026,status:'DRAFT',
@@ -486,7 +523,9 @@ function collectData(){return{
   productName:g('f_productName'),productMarketShare:g('f_dom25'),
   employees:g('f_emp25'),rdStaffCount:g('f_rdEmp25'),
   directTechAward:document.querySelector('input[name="f_natAward"]:checked')?.value==='true',
-  directChuangke:document.querySelector('input[name="f_chuangke"]:checked')?.value==='true'
+  directChuangke:document.querySelector('input[name="f_chuangke"]:checked')?.value==='true',
+  // 完整表单JSON，用于保存所有字段
+  formData: JSON.stringify(collectAllFormData())
 }}
 
 function saveDraft(){
@@ -703,6 +742,14 @@ async function startBlUpload() {
       const blMat = mats.find(m => m.materialName === '营业执照（副本）')
       if (blMat) blMatId = blMat.id
     } catch(e) {}
+  }
+
+  // OCR前自动保存草稿
+  try {
+    const d = collectData()
+    await (curId ? api('PUT', '/declarations/' + curId, d) : api('POST', '/declarations', d).then(r => { curId = r.id; $('formStatus').textContent = '📝 草稿已自动创建 (ID: ' + r.id + ')' }))
+  } catch(e) {
+    toast('自动保存失败', 'error')
   }
 
   $('bl-preview').style.display = 'none'

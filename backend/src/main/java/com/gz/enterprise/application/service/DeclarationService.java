@@ -446,6 +446,21 @@ public class DeclarationService {
         entity.setDirectTechAward(request.getDirectTechAward());
         entity.setDirectNationalAward(request.getDirectNationalAward());
         entity.setDirectChuangke(request.getDirectChuangke());
+        entity.setFormData(request.getFormData());
+        entity.setCreditCode(request.getCreditCode());
+        entity.setLegalRepresentative(request.getLegalRepresentative());
+        entity.setEstDate(request.getEstDate());
+        entity.setFullAddress(request.getFullAddress());
+        entity.setRegisteredCapital(request.getRegisteredCapital());
+        entity.setProvince(request.getProvince());
+        entity.setCity(request.getCity());
+        entity.setDistrict(request.getDistrict());
+        entity.setContactPerson(request.getContactPerson());
+        entity.setContactPhone(request.getContactPhone());
+        entity.setContactMobile(request.getContactMobile());
+        entity.setEmail(request.getEmail());
+        entity.setEmployees(request.getEmployees());
+        entity.setRdStaffCount(request.getRdStaffCount());
         return declarationRepo.save(entity);
     }
 
