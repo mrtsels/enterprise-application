@@ -4,6 +4,8 @@ import com.gz.enterprise.application.domain.Document;
 import com.gz.enterprise.application.service.DocumentService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -38,5 +40,13 @@ public class DocumentController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         documentService.delete(id);
+    }
+
+    @GetMapping("/files/{id}")
+    public ResponseEntity<byte[]> downloadFile(@PathVariable Long id) {
+        byte[] content = documentService.getFileContent(id);
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(content);
     }
 }

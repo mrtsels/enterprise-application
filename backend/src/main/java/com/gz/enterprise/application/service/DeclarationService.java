@@ -370,6 +370,7 @@ public class DeclarationService {
         list.add(m("创新能力", "研发人员花名册及社保证明", false));
         list.add(m("创新能力", "科技成果转化情况说明", false));
         list.add(m("经营规范", "管理体系认证证书", true));
+        list.add(m("经营规范", "数字化水平自测结果截图", true));
         list.add(m("经营规范", "信息化系统建设说明", false));
         list.add(m("经营规范", "无违法记录承诺函", true));
         list.add(m("经营规范", "近两年无重大安全/环保事故证明", true));
